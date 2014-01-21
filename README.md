@@ -1,6 +1,3 @@
-shapes
-======
-
 # Welcome to SketchUp Shapes extension
 
 A SketchUp Ruby Extension that creates shape objects.

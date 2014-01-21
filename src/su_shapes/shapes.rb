@@ -3,7 +3,7 @@
 # This software is provided as an example of using the Ruby interface
 # to SketchUp.
 
-# Permission to use, copy, modify, and distribute this software for 
+# Permission to use, copy, modify, and distribute this software for
 # any purpose and without fee is hereby granted, provided that the above
 # copyright notice appear in all copies.
 
@@ -43,7 +43,7 @@ def self.points_on_circle(center, normal, radius, numseg)
     center = Geom::Point3d.new(center)
     xaxis = axes[0]
     yaxis = axes[1]
-    
+
     xaxis.length = radius
     yaxis.length = radius
 
@@ -57,7 +57,7 @@ def self.points_on_circle(center, normal, radius, numseg)
         vec = Geom::Vector3d.linear_combination(cosa, xaxis, sina, yaxis)
         pts.push(center + vec)
     end
-    
+
     # close the circle
     pts.push(pts[0].clone)
 
@@ -73,7 +73,7 @@ def create_entities(data, container)
     w = data["w"].to_l
     d = data["d"].to_l
     h = data["h"].to_l
-    
+
     pts = [[0,0,0], [w,0,0], [w,d,0], [0,d,0], [0,0,0]]
     base = container.add_face pts
     h = -h if base.normal.dot(Z_AXIS) < 0.0
@@ -114,7 +114,7 @@ def create_entities(data, container)
     base = container.add_face circle
     h = -h if base.normal.dot(Z_AXIS) < 0.0
     base.pushpull h
-    
+
 end
 
 def default_parameters
@@ -149,7 +149,7 @@ def create_entities(data, container)
     base = container.add_face circle
     h = -h if base.normal.dot(Z_AXIS) < 0.0
     base.pushpull h
-    
+
 end
 
 def default_parameters
@@ -195,8 +195,8 @@ def create_entities(data, container)
     # Create the base
     circle = container.add_circle ORIGIN, Z_AXIS, r, n
     base = container.add_face circle
-    base_edges = base.edges 
-    
+    base_edges = base.edges
+
     # Create the sides
     apex = [0,0,h]
     e1 = nil
@@ -210,11 +210,11 @@ def create_entities(data, container)
         end
         e1 = e2
     end
-    
+
     # Create the last side face
     edge = base_edges[0]
     container.add_face edge.start.position, edge.end.position, apex
-    
+
 end
 
 def default_parameters
@@ -248,7 +248,7 @@ def create_entities(data, container)
 
     # Compute the cross-section circle points
     pts = PLUGIN.points_on_circle([r2, 0, 0], [0, -1, 0], r1, n1)
-    
+
     # Now create a polygon mesh and revolve these points
     numpts = n1*n2
     numpoly = numpts
@@ -257,7 +257,7 @@ def create_entities(data, container)
 
     # create faces from the mesh
     container.add_faces_from_mesh( mesh, 12 )
-    
+
 end
 
 def validate_parameters(data)
@@ -305,7 +305,7 @@ def create_entities(data, container)
     inner[0].faces.each {|f| f.erase! if( f != face)}
     h = -h if face.normal.dot(Z_AXIS) < 0.0
     face.pushpull h
-    
+
 end
 
 def default_parameters
@@ -355,14 +355,14 @@ def create_entities(data, container)
     pts[2] = [b2, b2, 0]
     pts[3] = [-b2, b2, 0]
     container.add_face pts
-    
+
     # Create the sides
     apex = [0,0,h]
     container.add_face pts[0], apex, pts[1]
     container.add_face pts[1], apex, pts[2]
     container.add_face pts[2], apex, pts[3]
     container.add_face pts[3], apex, pts[0]
-    
+
 end
 
 def default_parameters
@@ -402,7 +402,7 @@ def create_entities(data, container)
         sina = Math.sin(angle)
         arcpts.push(Geom::Point3d.new(r*cosa, 0, r*sina))
     end
-    
+
     # create a mesh and revolve the quater circle
     numpoly = n90*n90*4
     numpts = numpoly + 1
@@ -411,7 +411,7 @@ def create_entities(data, container)
 
     # create faces from the mesh
     container.add_faces_from_mesh( mesh, smooth )
-    
+
 end
 
 def default_parameters

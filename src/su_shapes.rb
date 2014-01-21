@@ -3,7 +3,7 @@
 # This software is provided as an example of using the Ruby interface
 # to SketchUp.
 
-# Permission to use, copy, modify, and distribute this software for 
+# Permission to use, copy, modify, and distribute this software for
 # any purpose and without fee is hereby granted, provided that the above
 # copyright notice appear in all copies.
 

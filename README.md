@@ -1,8 +1,7 @@
-# Welcome to SketchUp Shapes extension
+# SketchUp Shapes extension
 
-A SketchUp Ruby Extension that creates shape objects.
 
-SketchUp Shape obects are simple primitive shapes that can be quickly created by filling out a template.  The objects created by the shapes extension are also parametric so they can be edited after creation.  This extension is an Open Source project and can be improved by anyone.
+SketchUp Shapes allows users to quickly creates 3D shape obects by specifying a few attributes.  The objects created by the shapes extension are also parametric so they can be edited after creation.  This extension is an Open Source project and can be improved by anyone.
 
 
 ## Installing

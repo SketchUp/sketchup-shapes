@@ -25,14 +25,14 @@ If you're an owner of this repository, here are some steps.
 
 Get a local copy of the files. This will create a sketchup-stl folder.
 
-  git clone https://github.com/SketchUp/shapes.git  
-  cd shapes  
+    git clone https://github.com/SketchUp/shapes.git  
+    cd shapes  
 
 Use your favorite editor to edit README.md. Then...
 
-  git add README.md                     // Marks README.md for edit.  
-  git commit -m "Editing our README"    // Records changes in the local branch.  
-  git push                              // Submits to repository. Yay!  
+    git add README.md                     // Marks README.md for edit.  
+    git commit -m "Editing our README"    // Records changes in the local branch.  
+    git push                              // Submits to repository. Yay!  
 
 ### Community 
 
@@ -42,11 +42,11 @@ If you're a SketchUp Ruby community member, you need to fork this repository (If
 
 1. Fork this repository ([tutorial](https://help.github.com/articles/fork-a-repo)). Forking will create a copy of this repository under your GitHub username.
 
-1. Clone a local copy of your fork to your compuater. For this you will need git installed on your personal computer. [SourceTree](http://www.sourcetreeapp.com/) is a good choice. It will let you perform most Git tasks via a GUI.
+1. Clone a local copy of your fork to your compuater. For this you will need git installed on your personal computer. [SourceTree](http://www.sourcetreeapp.com/) is a good choice. It will let you perform most git tasks via a GUI.
 
 1. Add this repository as a remote so you can pull in updates to your clone.
 
-    git remote add upstream https://github.com/SketchUp/sketchup-stl.git
+        git remote add upstream https://github.com/SketchUp/sketchup-stl.git
 
 1. Make your changes to the code in your cloned repository, then commit. (`git commit ...`)
 

@@ -25,7 +25,7 @@ If you're an owner of this repository, here are some steps.
 
 Get a local copy of the files. This will create a sketchup-stl folder.
 
-    git clone https://github.com/SketchUp/shapes.git  
+    git clone https://github.com/SketchUp/sketchup-shapes.git  
     cd shapes  
 
 Use your favorite editor to edit README.md. Then...

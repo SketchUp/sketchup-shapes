@@ -30,7 +30,7 @@ module Shapes
 # Create the extension.
 shapes_ext = SketchupExtension.new 'Shapes Tool', 'su_shapes/shapes.rb'
 shapes_ext.description = 'Shapes sample script from SketchUp.com'
-shapes_ext.version =  '1.1.1'
+shapes_ext.version =  '1.1.2'
 shapes_ext.creator = "SketchUp"
 shapes_ext.copyright = "2014, Trimble Navigation Limited"
 

@@ -1,16 +1,22 @@
-# Original v1.0 Copyright 2013, Trimble Navigation Limited
-# Subsequent versions 1.1 and later Copyright 2013 John W McClenahan
+# The MIT License (MIT)
+# Copyright (c) 2014 Trimble Navigation Ltd.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 
-# The original version 1.0 software was provided as an example of using the Ruby interface
-# to SketchUp.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
-# Permission to use, copy, modify, and distribute this software for 
-# any purpose and without fee is hereby granted, provided that the above
-# copyright notice appear in all copies.
-
-# THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 #-----------------------------------------------------------------------------
 # Name        :   Shapes 1.4.1
 # Description :   Classes for creating and editing parametric shapes from the Sketchup Draw/Shapes menu
@@ -22,8 +28,8 @@
 #             :   Draw->Shapes->Prism
 #             :   Draw->Shapes->Pyramid
 #             :   Draw->Shapes->Dome
-#             :   Draw->Shapes->Sphere
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
+#             :   Draw->Shapes->Sphere*
+# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere* [* = added in v1.3]
 # Usage       :   Select desired shape and fill in the dialogue box that opens.
 # Date        :   Original 2004-09-14. Latest revision 2014-01-29
 # Type        :   Dialogue Box
@@ -69,19 +75,17 @@ require 'sketchup.rb'
 require 'extensions.rb'
 
 module Sketchup::Samples
-# module JWM
 module Shapes
 
 # Create the extension.
 shapes_ext = SketchupExtension.new 'Shapes Tool', 'su_shapes/shapes.rb'
-shapes_ext.description = 'Enhanced Shapes based on original script from SketchUp.com'
-shapes_ext.version =  '1.4.1'
-shapes_ext.creator = "Sketchup and John McClenahan"
-shapes_ext.copyright = "2013, John McClenahan and Trimble Navigation Limited Sketchup Team "
+shapes_ext.description = 'Shapes sample script from SketchUp.com'
+shapes_ext.version =  '1.1.2'
+shapes_ext.creator = "Sketchup"
+shapes_ext.copyright = "2014 Trimble Navigation Limited"
 
-# Register the extension with Sketchup so it show up in the Preference panel.
+# Register the extension with Sketchup so it show up in the Preferences panel.
 Sketchup.register_extension shapes_ext, true
 
 end # module Shapes
-# end module JWM
 end # module Sketchup::Samples

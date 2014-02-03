@@ -1,6 +1,5 @@
+# The MIT License (MIT)
 # Copyright 2014 Trimble Navigation Ltd.
-#
-# License: The MIT License (MIT)
 #
 # A SketchUp Ruby Extension that creates simple shape objects.  More info at  
 # https://github.com/SketchUp/shapes

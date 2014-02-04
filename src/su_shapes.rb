@@ -1,5 +1,7 @@
 # The MIT License (MIT)
+
 # Copyright (c) 2014 Trimble Navigation Ltd.
+
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -18,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.1
-# Description :   Classes for creating and editing parametric shapes from the Sketchup Draw/Shapes menu
+# Name        :   Shapes 1.0
+# Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
 #             :   Draw->Shapes->Cone

@@ -1,24 +1,15 @@
-# The MIT License (MIT)
+# Copyright 2013, Trimble Navigation Limited
 
-# Copyright (c) 2014 Trimble Navigation Ltd.
+# This software is provided as an example of using the Ruby interface
+# to SketchUp.
 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# Permission to use, copy, modify, and distribute this software for 
+# any purpose and without fee is hereby granted, provided that the above
+# copyright notice appear in all copies.
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #-----------------------------------------------------------------------------
 # Name        :   Parametric 1.0
 # Description :   This file defines the Parametric module that lets you define
@@ -36,6 +27,7 @@
 require 'sketchup.rb'
 
 #=============================================================================
+
 module Sketchup::Samples
 
 class Parametric
@@ -44,10 +36,10 @@ class Parametric
 def initialize(*args)
 
     data = args[0]
-
+    
     data = self.prompt("Create") if not data
     return if not data
-
+    
     if( data.kind_of? Sketchup::Entity )
         @entity = data
     else
@@ -60,20 +52,20 @@ def initialize(*args)
             model.abort_operation
             return
         end
-
+    
         self.create_entities(data, container)
 
         # Set the parameters for the object
         self.set_attributes(data)
-
+        
         # Apply the transform if one was given
         t = args[1]
         if( t.kind_of? Geom::Transformation )
             @entity.transformation = t
         end
-
+    
         model.commit_operation
-
+    
         @entity
     end
 end
@@ -125,7 +117,7 @@ end
 # Get the parameter data from an entity
 def parameters
     return nil if not @entity
-
+    
     attribs = self.attribute_dictionary
     return nil if not attribs
     data = {}
@@ -166,7 +158,7 @@ def prompt(operation)
     end
     results = inputbox( prompts, values, title )
     return nil if not results
-
+    
     # Store the results back into data
     # results will be an Array with one value for each prmopt
     results.each_index { |i| data[keys[i]] = results[i] }
@@ -179,10 +171,10 @@ def set_attributes(data)
 
     # Get the AttributeDictionary - create it if needed
     attribs = attribute_dictionary(true)
-
+    
     # Set the class name
     attribs["class"] = self.class.name
-
+    
     # now set the data values
     data.each { |key, value| attribs[key] = value }
 
@@ -200,27 +192,27 @@ def edit
         puts "There is no Entity to Edit"
         return false
     end
-
+    
     data = self.prompt "Edit"
     return false if not data
-
+    
     # Make sure that valid values were entered
     ok = self.validate_parameters(data)
     if( not ok )
         return false
     end
-
+    
     # Now clear the old definition and regen the entities
     container = self.get_container
     model = @entity.model
     model.start_operation "Edit " + self.class.name
-
+    
     container.clear!
     self.create_entities(data, container)
 
     self.set_attributes(data)
     model.commit_operation
-
+    
     @entity
 end
 
@@ -238,7 +230,7 @@ end
 def Parametric.parametric?(ent)
     klass = Parametric.get_class(ent)
     return false if not klass
-
+    
     # Make sure that we can actually create an instance of this class.
     begin
         new_method = eval "#{klass}.method :new"
@@ -248,7 +240,7 @@ def Parametric.parametric?(ent)
         puts "Could not find implementation of #{klass}"
         return false
     end
-
+    
     # return the class name
     klass
 end
@@ -265,10 +257,10 @@ def Parametric.edit(ent)
         puts "#{ent} is not a parametric Entity"
         return false
     end
-
+    
     # Get the class of the parametric object
     klass = Parametric.get_class(ent)
-
+    
     # Create a new parametric object of that class
     new_method = eval "#{klass}.method :new"
     obj = new_method.call ent
@@ -276,7 +268,7 @@ def Parametric.edit(ent)
         puts "Could not create the parametric object for #{klass}"
         return false
     end
-
+    
     # Now edit the object
     obj.edit
 end

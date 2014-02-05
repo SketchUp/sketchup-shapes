@@ -30,11 +30,10 @@
 #             :   Draw->Shapes->Prism
 #             :   Draw->Shapes->Pyramid
 #             :   Draw->Shapes->Dome
-#             :   Draw->Shapes->Sphere* 
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere* [* = added in v1.3]
-# Usage       :   Select desired shape and fill in the dialogue box that opens.
+# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome
+# Usage       :   Select desired shape and fill in the dialog box that opens.
 # Date        :   9/14/2004
-# Type        :   Dialogue Box
+# Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 # Modified to v1.1 J W McClenahan 2013-09-14
 # Added parameter for number of segments to draw for Cylinder, Cone, Torus and  Tube, replacing fixed n=24.

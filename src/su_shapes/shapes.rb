@@ -37,7 +37,7 @@
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 
-require 'sketchup.rb'
+require "sketchup.rb"
 require "su_shapes/parametric.rb"
 require "su_shapes/mesh_additions.rb"
 
@@ -65,9 +65,9 @@ def self.unit_length
 # Get model units (imperial or metric) and length format
   model = Sketchup.active_model
   manager = model.options
-  if provider = manager['UnitsOptions'] # Check for nil value
-    lu = provider['LengthUnit'] # Length unit value
-    lf = provider['LengthFormat'] # Length format value
+  if provider = manager["UnitsOptions"] # Check for nil value
+    lu = provider["LengthUnit"] # Length unit value
+    lf = provider["LengthFormat"] # Length format value
 
     case (lu )
     when 0 ## Imperial units

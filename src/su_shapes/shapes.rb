@@ -9,8 +9,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in 
+# all copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.1
+# Name        :   Shapes 1.4.4
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -37,16 +37,17 @@
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 
+# Add references to other needed Ruby functions
 require "sketchup.rb"
 require "su_shapes/parametric.rb"
 require "su_shapes/mesh_additions.rb"
-
 
 module Sketchup::Samples::Shapes
 PLUGIN = self # Allows self reference later when calling function in module
 
 #=============================================================================
-# Find which unit and format the model is using and define unit_length accordingly
+# Find which unit and format the model is using and define unit_length 
+#   accordingly
 	# When LengthUnit = 0
 		# LengthFormat 0 = Decimal inches
 		# LengthFormat 1 = Architectural (feet and inches)
@@ -66,13 +67,14 @@ def self.unit_length
   model = Sketchup.active_model
   manager = model.options
   if provider = manager["UnitsOptions"] # Check for nil value
-    lu = provider["LengthUnit"] # Length unit value
-    lf = provider["LengthFormat"] # Length format value
+    length_unit = provider["LengthUnit"] # Length unit value
+    length_format = provider["LengthFormat"] # Length format value
 
-    case (lu )
+    case (length_unit)
     when 0 ## Imperial units
-      if lf == 1 or lf == 2  
-      ## model is using Architectural (feet and inches) or Engineering units (feet)  
+      if length_format == 1 || length_format == 2  
+      # model is using Architectural (feet and inches) 
+      # or Engineering units (feet)  
       unit_length = 1.feet 
       else
       ## model is using (decimal or fractional) inches
@@ -90,10 +92,10 @@ def self.unit_length
     when 4
       ## model is using metric units - metres
       unit_length =  1.m 
-
     end #end case
+
   else 
-    UI.messagebox " Can't determine model units - please set them in Window/ModelInfo"
+    UI.messagebox " Can't determine model units - please set in Window/ModelInfo"
   end # if  
 end 
 #=============================================================================
@@ -109,11 +111,11 @@ def self.points_on_circle(center, normal, radius, numseg)
   yaxis.length = radius
 
   # compute the points
-  da = (Math::PI * 2) / numseg
+  vertex_angle = (Math::PI * 2) / numseg
   pts = []
 
   for i in 0...numseg do
-    angle = i * da
+    angle = i * vertex_angle
     cosa = Math.cos(angle)
     sina = Math.sin(angle)
     vec = Geom::Vector3d.linear_combination(cosa, xaxis, sina, yaxis)
@@ -132,42 +134,46 @@ class Box < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
   # Set values from input data
-  w = data["w"].to_l # width
-  d = data["d"].to_l # depth
-  h = data["h"].to_l # height
+  width = data["width"].to_l # width
+  depth = data["depth"].to_l # depth
+  height = data["height"].to_l # height
 
   # Remember values for next use
-  @@dim1 = w
-  @@dim2 = d
-  @@dim3 = h
-    
-    pts = [[0,0,0], [w,0,0], [w,d,0], [0,d,0], [0,0,0]]
-    base = container.add_face pts
-    h = -h if base.normal.dot(Z_AXIS) < 0.0
-    base.pushpull h
+  @@dimension1 = width 
+  @@dimension2 = depth
+  @@dimension3 = height
+
+  # Draw box
+  pts = [[0,0,0], [width,0,0], [width,depth,0], [0,depth,0], [0,0,0]]
+  base = container.add_face pts
+  height = -height if base.normal.dot(Z_AXIS) < 0.0
+  base.pushpull height
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length
-  @@ul = PLUGIN.unit_length
-  
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"w" => @@ul, "d" => @@ul, "h" => @@ul }
+  # Set starting defaults to one unit_length
+  @@unit_length = PLUGIN.unit_length
+
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "width" => @@unit_length, "depth" => @@unit_length, 
+      "height" => @@unit_length }
   else
     # Reuse last inputs as defaults
-    defaults = {"w" => @@dim1, "d" => @@dim2, "h" => @@dim3}
+    defaults = { "width" => @@dimension1, "depth" => @@dimension2,
+      "height" => @@dimension3 }
   end # if
 end # default_parameters
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "w"
+  case(key)
+  when "width"
     prompt = "Width "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "d"
+  when "depth"
     prompt = "Depth "
   end
 
@@ -181,52 +187,57 @@ end # Class Box
 class Cylinder < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-  r = data["r"].to_l # Radius
-  h = data["h"].to_l # Height
-  n = data["s"].to_int # Number of segments in circle - was originally fixed at n=24
+  radius = data["radius"].to_l # Radius
+  height = data["height"].to_l # Height
+  # Number of segments in circle
+  num_segments = data["num_segments"].to_int   # was originally fixed at n=24
 
   # Remember values for next use
-  @@dim1 = r
-  @@dim2 = h
-  @@segs = n
-  
-  circle = container.add_circle ORIGIN, Z_AXIS, r, n
+  @@dimension1 = radius
+  @@dimension2 = height
+  @@segments = num_segments
+
+  # Draw cylinder
+  circle = container.add_circle ORIGIN, Z_AXIS, radius, num_segments
   base = container.add_face circle
-  h = -h if base.normal.dot(Z_AXIS) < 0.0
-  base.pushpull h
+  height = -height if base.normal.dot(Z_AXIS) < 0.0
+  base.pushpull height
 
-end
-
-def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
-
-  if !defined? @@segs
-    @@segs = 16
   end
 
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "h" => @@ul, "s" => @@segs }
+def default_parameters
+  # Set starting defaults to one unit_length and 
+  #   number of segments in circle to 16
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 16  # Set to 16 if not previously defined
+
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "height" => @@unit_length,
+      "num_segments" => @@segments }
   else
     # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "h" => @@dim2, "s" => @@segs}
+    defaults = { "radius" => @@dimension1, "height" => @@dimension2,
+      "num_segments" => @@segments }
   end # if
 
+  # Return values
   defaults
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "s"
+  when "num_segments"
     prompt = "Number of segments " ## added as parameter
   end
 
+  # Return value
   prompt
 end
 
@@ -238,49 +249,57 @@ class Prism < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
 
-  r = data["r"].to_l  # base radius
-  h = data["h"].to_l  # height to apex
-  n = data["n"].to_int  # number of sides
+  # Set size to draw
+  radius = data["radius"].to_l  # base radius
+  height = data["height"].to_l  # height to apex
+  num_sides = data["num_sides"].to_int  # number of sides
 
   # Remember values for next use
-  @@dim1 = r
-  @@dim2 = h
-  @@segs = n
-  
-  circle = container.add_ngon ORIGIN, Z_AXIS, r, n
+  @@dimension1 = radius
+  @@dimension2 = height
+  @@segments = num_sides
+
+  # Draw prism
+  circle = container.add_ngon ORIGIN, Z_AXIS, radius, num_sides
   base = container.add_face circle
-  h = -h if base.normal.dot(Z_AXIS) < 0.0
-  base.pushpull h
+  height = -height if base.normal.dot(Z_AXIS) < 0.0
+  base.pushpull height
   
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
 
-  if !defined? @@segs
-    @@segs = 6
-  end
+  # Set starting defaults to one unit_length,
+  #   and number of sides in prism to 6
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 6 # Set to 6 if not previously defined
 
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "h" => @@ul, "n" => @@segs }
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "height" => @@unit_length,
+      "num_sides" => @@segments }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "h" => @@dim2, "n" => @@segs}
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "height" => @@dimension2,
+      "num_sides" => @@segments }
   end # if
-    defaults
-    ## defaults = {"r", 2.feet, "h", 4.feet, "n", 6} ## Original values
+
+  # Return values
+  defaults
+
+  # Original values
+  #   defaults = { "radius", 2.feet, "height", 4.feet, "num_sides", 6 }
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "n"
+  when "num_sides"
     prompt = "Number of Sides "
   end
 
@@ -291,7 +310,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if( data["n"] < 3 )
+  if(data["num_sides"] < 3)
     UI.messagebox "At least 3 sides required"
     ok = false
   end
@@ -304,30 +323,31 @@ end # class Prism
 class Cone < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-
-  r = data["r"].to_l # Base radius
-  h = data["h"].to_l # Height to apex
-  n = data["s"].to_int ## Number of segments in circle - was originally fixed at n=24
+  # Set size to draw
+  radius = data["radius"].to_l # Base radius
+  height = data["height"].to_l # Height to apex
+  # Number of segments in circle (was originally fixed at num_segments=24)
+  num_segments = data["num_segments"].to_int
   
   # Remember values for next use
-  @@dim1 = r
-  @@dim2 = h
-  @@segs = n
+  @@dimension1 = radius
+  @@dimension2 = height
+  @@segments = num_segments
   
   # Create the base
-  circle = container.add_circle ORIGIN, Z_AXIS, r, n
+  circle = container.add_circle ORIGIN, Z_AXIS, radius, num_segments
   base = container.add_face circle
   base_edges = base.edges 
   
   # Create the sides
-  apex = [0,0,h]
+  apex = [0,0,height]
   e1 = nil
   e2 = nil
   base_edges.each do |edge|
     e2 = container.add_line edge.start.position, apex
     e2.soft = true
     e2.smooth = true
-    if( e1 )
+    if(e1) 
       container.add_face edge, e2, e1
     end
     e1 = e2
@@ -339,35 +359,38 @@ def create_entities(data, container)
  end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
+  # Set starting defaults to one unit_length 
+  #   and number of segments in circle to 16
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 16 # Set to 16 if not previously defined
 
-  if !defined? @@segs
-    @@segs = 16
-  end
-
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "h" => @@ul, "s" => @@segs }
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "height" => @@unit_length,
+      "num_segments" => @@segments }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "h" => @@dim2, "s" => @@segs}
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "height" => @@dimension2,
+      "num_segments" => @@segments }
   end # if
 
+  # Return values
   defaults
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "s"
+  when "num_segments"
     prompt = "Number of segments " ## added as parameter
   end
 
+  # Return value
   prompt
 end
 
@@ -378,19 +401,25 @@ class Torus < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
 
-  r1 = data["r1"].to_l # small radius of torus (radius of revolved circle)
-  r2 = data["r2"].to_l # large radius (outer radius to outside of torus)
-  n1 = data["s1"].to_int ## segments in small radius (added by JWM)
-  n2 = data["s2"].to_int ## segments in large radius (added by JWM)
+  # Set sizes to draw
+  # small radius of torus (radius of revolved circle)
+  small_radius = data["small_radius"].to_l
+  # large radius (outer radius to outside of torus)  
+  outer_radius = data["outer_radius"].to_l
+  # segments in small radius (added by JWM)
+  n1 = data["s1"].to_int
+  # segments in large radius (added by JWM)
+  n2 = data["s2"].to_int
 
   # Remember values for next use
-  @@dim1 = r1
-  @@dim2 = r2
+  @@dimension1 = small_radius
+  @@dimension2 = outer_radius
   @@segs1 = n1
   @@segs2 = n2
   
   # Compute the cross-section circle points
-  pts = PLUGIN.points_on_circle([r2 -r1, 0, 0], [0, -1, 0], r1, n1)
+  pts = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
+    [0, -1, 0], small_radius, n1)
   
   # Now create a polygon mesh and revolve these points
   numpts = n1*n2
@@ -399,7 +428,7 @@ def create_entities(data, container)
   mesh.add_revolved_points(pts, [ORIGIN, Z_AXIS], n2)
 
   # create faces from the mesh
-  container.add_faces_from_mesh( mesh, 12 )
+  container.add_faces_from_mesh(mesh, 12)
   
 end
 
@@ -407,7 +436,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that the small radius is no more than half the outer radius
-  if( data["r1"] > data["r2"]/2.0 )
+  if(data["small_radius"] > data["outer_radius"]/2.0)
     UI.messagebox "Small radius must be no more than half the outer radius"
     ok = false
   end
@@ -416,38 +445,44 @@ def validate_parameters(data)
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
+  # Set starting defaults to one unit_length 
+  #   and number of segments in circle to 16
+  @@unit_length = PLUGIN.unit_length
 
-  if !defined? @@segs1
-    @@segs1 = 16
-    @@segs2 = 16
-  end
+  # Set other starting defaults if none set
+  @@segs1 ||= 16
+  @@segs2 ||= 16
 
-  if !defined? @@dim1  # then no previous values input
-    # set defaults with outer radius = one unit_length, small radius one quarter of that, 
-    defaults = {"r1" => (@@ul/4.0).to_l, "r2" => @@ul, "s1" => @@segs1,"s2" => @@segs2 }
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    # set defaults: outer radius = one unit_length, small radius one quarter 
+    defaults = { "small_radius" => (@@unit_length/4.0).to_l,
+      "outer_radius" => @@unit_length, "s1" => @@segs1,"s2" => @@segs2 }
   else
     # Reuse last inputs as defaults
-    defaults = {"r1" => @@dim1, "r2" => @@dim2, "s1" => @@segs1, "s2" => @@segs2 }
+    defaults = { "small_radius" => @@dimension1,
+      "outer_radius" => @@dimension2,
+      "s1" => @@segs1, "s2" => @@segs2 }
   end # if
 
+  # Return values
   defaults
 end
 
 def translate_key(key)
   prompt = key
-  case( key )
-  when "r1"
+  case(key)
+  when "small_radius"
     prompt = "Small Radius "
-  when "r2"
+  when "outer_radius"
     prompt = "Outer Radius "
   when "s1"
-    prompt = "Segments - small " ## added as parameter
+    prompt = "Segments - small " # added as parameter by JWM
   when "s2"
-    prompt = "Segments - outer " ## added as parameter
+    prompt = "Segments - outer " #added as parameter by JWM
   end
 
+  # Return value
   prompt
 end
 
@@ -458,68 +493,83 @@ end # Class Torus
 class Tube < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-
-  r1 = data["r"].to_l # Outer radius
-  t = data["t"].to_l  # Wall thickness
-  r2 = r1 - t      # Inner radius
-  h = data["h"].to_l  # Height
-  n = data["s"].to_int ## was originally fixed n=24
+  # Set sizes to draw
+  outer_radius = data["radius"].to_l # Outer radius
+  thickness = data["thickness"].to_l  # Wall thickness
+  inner_radius = outer_radius - thickness      # Inner radius
+  height = data["height"].to_l  # Height
+  # Number of segments to use for circle (was originally at 24)
+  num_segments = data["num_segments"].to_int 
 
   # Remember values for next use
-  @@dim1 = r1
-  @@dim2 = t
-  @@dim3 = h
-  @@segs = n
-  
-  outer = container.add_circle ORIGIN, Z_AXIS, r1, n
+  @@dimension1 = outer_radius
+  @@dimension2 = thickness
+  @@dimension3 = height
+  @@segments = num_segments
+
+  # Draw tube
+  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments
   face = container.add_face outer
-  inner = container.add_circle ORIGIN, Z_AXIS, r2, n
-  inner[0].faces.each {|f| f.erase! if( f != face)}
-  h = -h if face.normal.dot(Z_AXIS) < 0.0
-  face.pushpull h
+  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments
+  inner[0].faces.each { |f| f.erase! if(f != face) }
+  height = -height if face.normal.dot(Z_AXIS) < 0.0
+  face.pushpull height
   
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
-  if !defined? @@segs
-    @@segs = 16
-  end
-  if !defined? @@dim3  # then no previous values input
-    defaults = {"r" => @@ul, "t" => (@@ul/10.0).to_l, "h" => @@ul,"s" => @@segs }
+  # Set starting defaults to one unit_length 
+  #  and number of segments in circle to 16
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 16 # Set to 16 if not defined
+
+  # Set other starting defaults if none set
+  if !defined? @@dimension3  # then no previous values input
+    defaults = { "radius" => @@unit_length,
+      "thickness" => (@@unit_length/10.0).to_l,
+      "height" => @@unit_length,"num_segments" => @@segments }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "t" => @@dim2, "h" => @@dim3, "s" => @@segs }
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "thickness" => @@dimension2,
+      "height" => @@dimension3,
+      "num_segments" => @@segments }
   end # if 
-    ## defaults = {"r", 2.feet, "t", 3.inch, "h", 4.feet,"s",16} ## Original parameters
-    defaults
+
+  # Original parameters
+  # defaults = { "radius", 2.feet, "thickness", 3.inch, "height",
+  #   4.feet,"num_segments",16 }
+
+  # Return values
+  defaults
 end
 
 def validate_parameters(data)
   ok = true
 
   # make sure that the thickness is less than the radius
-  if( data["t"] >= data["r"] )
+  if(data["thickness"] >= data["radius"])
     UI.messagebox "Wall thickness must be smaller than radius"
     ok = false
   end
 
+  # Return value
   ok
 end
 
 def translate_key(key)
   prompt = key
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "t"
+  when "thickness"
     prompt = "Wall Thickness "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "s"
+  when "num_segments"
     prompt = "Number of segments " ## added as parameter
   end
+
+  # Return value
   prompt
 end
 
@@ -530,35 +580,35 @@ end #Class Tube
 class Pyramid < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-
-  r = data["r"].to_l  # Radius
-  h = data["h"].to_l  # Height
-  n = data["n"].to_int   # Number of sides
+  # Set sizes to draw
+  radius = data["radius"].to_l  # Radius
+  height = data["height"].to_l  # Height
+  num_segments = data["num_segments"].to_int   # Number of sides
 
   # Remember values for next use
-  @@dim1 = r
-  @@dim2 = h
-  @@segs = n
+  @@dimension1 = radius
+  @@dimension2 = height
+  @@segments = num_segments
   
-  # draw base and define apex point
-  circle = container.add_ngon ORIGIN, Z_AXIS, r, n
+  # Draw base and define apex point
+  circle = container.add_ngon ORIGIN, Z_AXIS, radius, num_segments
   base = container.add_face circle
-  apex = [0,0,h]
+  apex = [0,0,height]
   base_edges = base.edges 
   
   # Create the sides
-  apex = [0,0,h]
+  apex = [0,0,height]
   e1 = nil
   e2 = nil
   base_edges.each do |edge|
     e2 = container.add_line edge.start.position, apex
     e2.soft = false
     e2.smooth = false
-    if( e1 )
+    if(e1)
       container.add_face edge, e2, e1
     end
     e1 = e2
-  end
+  end # do
   
   # Create the last side face
   edge = base_edges[0]
@@ -566,35 +616,41 @@ def create_entities(data, container)
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
+  # Set starting defaults to one unit_length
+  #   and number of sides to 4
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 4 # Set to 4 if not defined
 
-  if !defined? @@segs
-    @@segs = 4
-  end
-
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "h" => @@ul, "n" => @@segs }
+  # Set other starting defaults if not set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "height" => @@unit_length,
+      "num_segments" => @@segments }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "h" => @@dim2, "n" => @@segs }
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "height" => @@dimension2,
+      "num_segments" => @@segments }
   end # if
-    defaults
-    ## defaults = {"r", 2.feet, "h", 4.feet, "n", 6} ## Original values
+
+  # Return values
+  defaults
+
+  # Original values were
+  #   defaults = { "radius", 2.feet, "height", 4.feet, "num_segments", 6 }
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "h"
+  when "height"
     prompt = "Height "
-  when "n"
+  when "num_segments"
     prompt = "Number of Sides "
   end
 
+  # Return value
   prompt
 end
 
@@ -602,11 +658,12 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if( data["n"] < 3 )
+  if(data["num_segments"] < 3)
     UI.messagebox "At least 3 sides required"
     ok = false
   end
 
+  # Return value
   ok
 end
 
@@ -617,76 +674,79 @@ end # Class Pyramid
 class Dome < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-
-  r = data["r"].to_l  # Base radius
-  n90 = data["n"].to_i  # Number of segments per 90 degrees
+  # Set sizes to draw
+  radius = data["radius"].to_l  # Base radius
+  n90 = data["num_segments"].to_i  # Number of segments per 90 degrees
   smooth = 12  # smooth 
 
   # Remember values for next use
-  @@dim1 = r
-  @@segs = n90
+  @@dimension1 = radius
+  @@segments = n90
   
-  # compute a quarter circle
+  # Compute a quarter circle
   arcpts = []
   delta = Math::PI/(2*n90)
   for i in 0..n90 do
     angle = delta * i
     cosa = Math.cos(angle)
     sina = Math.sin(angle)
-    arcpts.push(Geom::Point3d.new(r*cosa, 0, r*sina))
+    arcpts.push(Geom::Point3d.new(radius*cosa, 0, radius*sina))
   end
 
-  # create a mesh and revolve the quarter circle
+  # Create a mesh and revolve the quarter circle
   numpoly = n90*n90*4
   numpts = numpoly + 1
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
   mesh.add_revolved_points(arcpts, [ORIGIN, Z_AXIS], n90*4)
 
-  # create faces from the mesh
-  container.add_faces_from_mesh( mesh, smooth )
+  # Create faces from the mesh
+  container.add_faces_from_mesh(mesh, smooth)
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments in circle to 16
-  @@ul = PLUGIN.unit_length
+  # Set starting defaults to one unit_length
+  #   and number of segments per 90 degrees to 5
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 5 # per 90 degrees if not previously defined
 
-  if !defined? @@segs
-    @@segs = 5 # per 90 degrees
-  end
-
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "n" => 5 }
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "num_segments" => 5 }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "n" => @@segs}
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
   end # if 
   
-  ## defaults = {"r", 2.feet, "n", 5} ## original default values
+  # Original default values
+  #   defaults = { "radius", 2.feet, "num_segments", 5 } 
 
+  # Return values
   defaults
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "n"
+  when "num_segments"
     prompt = "Segments (per 90 deg) "
   end
 
+  # Return value
   prompt
 end
 
 def validate_parameters(data)
   ok = true
 
-  if( data["n"] < 1 )
+  if(data["num_segments"] < 1)
     UI.messagebox "At least 1 segment required"
     ok = false
   end
 
+  # Return value
   ok
 end
 
@@ -696,76 +756,80 @@ end # Class Dome
 class Sphere < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
-
-  r = data["r"].to_l  # Radius
-  n90 = data["n"].to_i  # Segments per 90 degrees
+  # Set sizes to draw
+  radius = data["radius"].to_l  # Radius
+  n90 = data["num_segments"].to_i  # Segments per 90 degrees
   smooth = 12  # smooth parameter
 
   # Remember values for next use
-  @@dim1 = r
-  @@segs = n90
+  @@dimension1 = radius
+  @@segments = n90
   
-  # compute a half circle
+  # Compute a half circle
   arcpts = []
   delta = Math::PI/(2*n90)
   for i in -n90..n90 do
     angle = delta * i
     cosa = Math.cos(angle)
     sina = Math.sin(angle)
-    arcpts.push(Geom::Point3d.new(r*cosa, 0, r*sina))
+    arcpts.push(Geom::Point3d.new(radius*cosa, 0, radius*sina))
   end
   
-  # create a mesh and revolve the half circle
+  # Create a mesh and revolve the half circle
   numpoly = n90*n90*4
   numpts = numpoly + 1
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
   mesh.add_revolved_points(arcpts, [ORIGIN, Z_AXIS], n90*4)
 
-  # create faces from the mesh
-  container.add_faces_from_mesh( mesh, smooth )
+  # Create faces from the mesh
+  container.add_faces_from_mesh(mesh, smooth)
   
 end
 
 def default_parameters
-  ## Set starting defaults to one unit_length and number of segments per 90 degrees to 5
-  @@ul = PLUGIN.unit_length
+  # Set starting defaults to one unit_length 
+  #   and number of segments per 90 degrees to 5
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 5 # per 90 degrees if not previously defined
 
-  if !defined? @@segs
-    @@segs = 5 # per 90 degrees
-  end
-
-  if !defined? @@dim1  # then no previous values input
-    defaults = {"r" => @@ul, "n" => 5 }
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "radius" => @@unit_length, "num_segments" => 5 }
   else
-    # Reuse last inputs as defaults
-    defaults = {"r" => @@dim1, "n" => @@segs}
+  # Reuse last inputs as defaults
+    defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
   end # if 
-  ## defaults = {"r", 2.feet, "n", 5} # original defaults
+  
+  # Original defaults
+  #   defaults = { "radius", 2.feet, "num_segments", 5 } 
 
+  # Return values
   defaults
 end
 
 def translate_key(key)
   prompt = key
 
-  case( key )
-  when "r"
+  case(key)
+  when "radius"
     prompt = "Radius "
-  when "n"
+  when "num_segments"
     prompt = "Segments(per 90 degrees) "
   end
 
+  # Return value
   prompt
 end
 
 def validate_parameters(data)
   ok = true
 
-  if( data["n"] < 1 )
+  if(data["num_segments"] < 1)
     UI.messagebox "At least 1 segment required"
     ok = false
   end
 
+  # Return value
   ok
 end
 
@@ -773,10 +837,9 @@ end # Class Sphere
 #=============================================================================
 
 # Add a menu to create shapes
-if (not $shapes_menu_loaded)
+if not $shapes_menu_loaded
   add_separator_to_menu("Draw")
   shapes_menu = UI.menu("Draw").add_submenu("3D Shapes")
-
   shapes_menu.add_item("Box") { Box.new }
   shapes_menu.add_item("Cylinder") { Cylinder.new }
   shapes_menu.add_item("Cone") { Cone.new }

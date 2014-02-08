@@ -1,0 +1,111 @@
+﻿2014-02-06 v1.4.2
+Tidied up some style points: replaced single quotes by double quotes; 
+  changed tabs to 2 spaces; aligned case/when/end layout
+
+2014-02-07 v1.4.3
+Changed short variable names to more informative descriptive names
+A few left where internal to a procedure, or descriptive name would be
+  too long
+
+2014-02-08 v1.4.4
+Fixing coding style points using https://github.com/styleguide/ruby
+
+# Formatting styles:
+Soft tabs with two space indent - already done
+Lines less than 80 characters long - wrapped at comma or other punctuation
+No trailing whitespace: none found 
+Spaces round operators: 
+  None visible missing round = or == signs 
+  Searched for { and added spaces where necessary before/after opening braces
+    and before closing braces
+  No spaces after or before ([, )] - searched and replaced all brackets 
+    that had spaces
+  No spaces after ! - none found except where it is properly after an action!
+    method (f.erase! ...)
+Indent when as deep as case - already done
+Use empty lines between defs and to break up a method 
+  into logical paragraphs - done where not already present
+
+# Syntax styles
+Use def with parentheses when there are arguments - already done
+Never use 'for' unless you know exactly why - three instances from original
+  code. Not sure how to replace: with 'each' construct? ** Come back to this
+Never use 'then' for multi-line if/unless - no occurrences
+Avoid the ternary operator (?:) except in cases where all expressions are 
+  extremely trivial. However, do use the ternary operator(?:) over 
+  if/then/else/end constructs for single line conditionals 
+  Neither construct ever used
+The and and or keywords are banned. It's just not worth it. 
+  Always use && and || instead - one use of 'or' replaced by '||'
+Favour modifier if/unless usage when you have a single-line body
+  - only a few, all now fixed
+Never use unless with else. Rewrite these with the positive case first
+  - none found
+Don't use parentheses around the condition of an if/unless/while
+  - one found, fixed
+Prefer {...} over do...end for single-line blocks
+  - no single line 'do's found
+Avoid return where not required - none used
+Use spaces around the = operator when assigning default values 
+  to method parameters - none used
+Using the return value of = (an assignment) is ok - used in a few instances 
+Use ||= freely to initialize variables 
+  - now used to assign default @@segments 
+Don't use ||= to initialize boolean variables - not used
+Avoid using Perl-style special variables (like $0-9, $, etc. )
+  - not used
+Never put a space between a method name and the opening parenthesis
+  - no instances
+If the first argument to a method begins with an open parenthesis, 
+  always use parentheses in the method invocation
+  - no instances
+Use _ for unused block parameters - no instances
+Don't use the === (threequals) operator to check types - no instances
+
+# Naming styles
+Use snake_case for methods and variables - already done
+Use CamelCase for classes and modules - already done
+Use SCREAMING_SNAKE_CASE for other constants - one instance: PLUGIN
+The names of potentially "dangerous" methods (i.e. methods that 
+  modify self or the arguments, exit!, etc.) 
+  should end with an exclamation mark - no instances remaining
+
+# Classes
+Avoid the usage of class (@@) variables due to their unusual behaviour 
+  in inheritance - used extensively, but not with inheritance
+  - I don't know how else to get variables persistent across uses 
+  of the plugin
+Use def self.method to define singleton methods - two instances.
+  I don't see any other opportunities to use this
+Avoid class << self except when necessary - not used
+Indent the public, protected, and private methods as much the 
+  method definitions they apply to. Leave one blank line above them
+  - not used
+Avoid explicit use of self as the recipient of internal class or 
+  instance messages unless to specify a method shadowed by a variable
+  - not used
+
+# Collections
+Prefer %w to the literal array syntax when you need an array of strings
+  - no string arrays used
+Use Set instead of Array when dealing with unique elements
+  - no relevant usage
+Use symbols instead of strings as hash keys
+  - ** don't understand how 'symbols' differ from strings
+
+# Strings
+Prefer string interpolation instead of string concatenation - neither used
+Prefer double-quoted strings - all single quoted strings changed to double
+Avoid using String+ when you need to construct large data chunks. 
+  Instead, use String<<
+  - neither construct used
+
+# Regular Expressions
+  - not used
+
+# Percent literals
+  - not used
+
+# Hashes
+Use hashrocket syntax for Hash literals - changed in defaults = {...} lines
+

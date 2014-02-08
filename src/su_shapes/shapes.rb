@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.4
+# Name        :   Shapes 1.4.5
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -70,7 +70,7 @@ def self.unit_length
     length_unit = provider["LengthUnit"] # Length unit value
     length_format = provider["LengthFormat"] # Length format value
 
-    case (length_unit)
+    case length_unit
     when 0 ## Imperial units
       if length_format == 1 || length_format == 2  
       # model is using Architectural (feet and inches) 
@@ -111,7 +111,7 @@ def self.points_on_circle(center, normal, radius, numseg)
   yaxis.length = radius
 
   # compute the points
-  vertex_angle = (Math::PI * 2) / numseg
+  vertex_angle = 360.degrees / numseg
   pts = []
 
   for i in 0...numseg do
@@ -168,7 +168,7 @@ end # default_parameters
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "width"
     prompt = "Width "
   when "height"
@@ -228,7 +228,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "height"
@@ -294,7 +294,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "height"
@@ -381,7 +381,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "height"
@@ -471,7 +471,7 @@ end
 
 def translate_key(key)
   prompt = key
-  case(key)
+  case key
   when "small_radius"
     prompt = "Small Radius "
   when "outer_radius"
@@ -558,7 +558,7 @@ end
 
 def translate_key(key)
   prompt = key
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "thickness"
@@ -641,7 +641,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "height"
@@ -685,7 +685,7 @@ def create_entities(data, container)
   
   # Compute a quarter circle
   arcpts = []
-  delta = Math::PI/(2*n90)
+  delta = 90.degrees/n90
   for i in 0..n90 do
     angle = delta * i
     cosa = Math.cos(angle)
@@ -705,13 +705,13 @@ end
 
 def default_parameters
   # Set starting defaults to one unit_length
-  #   and number of segments per 90 degrees to 5
+  #   and number of segments per 90 degrees to 4
   @@unit_length = PLUGIN.unit_length
-  @@segments ||= 5 # per 90 degrees if not previously defined
+  @@segments ||= 4 # per 90 degrees if not previously defined
 
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    defaults = { "radius" => @@unit_length, "num_segments" => 5 }
+    defaults = { "radius" => @@unit_length, "num_segments" => @@segments }
   else
   # Reuse last inputs as defaults
     defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
@@ -727,7 +727,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "num_segments"
@@ -767,7 +767,7 @@ def create_entities(data, container)
   
   # Compute a half circle
   arcpts = []
-  delta = Math::PI/(2*n90)
+  delta = 90.degrees/n90
   for i in -n90..n90 do
     angle = delta * i
     cosa = Math.cos(angle)
@@ -788,13 +788,13 @@ end
 
 def default_parameters
   # Set starting defaults to one unit_length 
-  #   and number of segments per 90 degrees to 5
+  #   and number of segments per 90 degrees to 4
   @@unit_length = PLUGIN.unit_length
-  @@segments ||= 5 # per 90 degrees if not previously defined
+  @@segments ||= 4 # per 90 degrees if not previously defined
 
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    defaults = { "radius" => @@unit_length, "num_segments" => 5 }
+    defaults = { "radius" => @@unit_length, "num_segments" => @@segments }
   else
   # Reuse last inputs as defaults
     defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
@@ -810,7 +810,7 @@ end
 def translate_key(key)
   prompt = key
 
-  case(key)
+  case key
   when "radius"
     prompt = "Radius "
   when "num_segments"
@@ -836,8 +836,9 @@ end
 end # Class Sphere
 #=============================================================================
 
-# Add a menu to create shapes
-if not $shapes_menu_loaded
+# Add a menu for creating 3D shapes
+# Checks if this script file has been loaded before in this SU session
+unless file_loaded?(__FILE__) # If not, create menu entries
   add_separator_to_menu("Draw")
   shapes_menu = UI.menu("Draw").add_submenu("3D Shapes")
   shapes_menu.add_item("Box") { Box.new }
@@ -849,7 +850,8 @@ if not $shapes_menu_loaded
   shapes_menu.add_item("Pyramid") { Pyramid.new }
   shapes_menu.add_item("Dome") { Dome.new }
   shapes_menu.add_item("Sphere") { Sphere.new }
-  $shapes_menu_loaded = true
+
+  file_loaded(__FILE__)
 end
 
 end # module Sketchup::Samples::Shapes

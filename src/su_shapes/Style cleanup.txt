@@ -109,3 +109,20 @@ Avoid using String+ when you need to construct large data chunks.
 # Hashes
 Use hashrocket syntax for Hash literals - changed in defaults = {...} lines
 
+2014-02-08 v1.4.5
+# Earlier issues revisited from issue #3 list and fixed 
+Use unless file_loaded(__FILE__) instead of if (not $shapes_menu_loaded)
+  - changed
+  (note, needs to be file_loaded?(__FILE__) with question mark to work)
+No parentheses in case(length_unit) or case(key) - now all removed
+Is this (f.erase!) safe? Erasing from the collection it iterates might 
+  be problematic. It's normally safer to collect entities to erase and bulk
+  erase them after iterating. It's also faster to erase in bulk than individual entities
+  - ** that may be so, but I don't know how to do that
+
+# Also:
+Fixed logic error in defining default number of segments for Dome and 
+  Sphere,  (which was accidentally still hard coded to 5 
+  in the defaults = {...} line)
+Changed default number from 5 to 4 per 90 degrees for consistency with
+  base circle segments for Cone, Cylinder, Tube and Torus

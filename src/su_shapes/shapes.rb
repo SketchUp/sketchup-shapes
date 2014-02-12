@@ -516,7 +516,7 @@ def create_entities(data, container)
   face.pushpull height
   
 end
-
+ 
 def default_parameters
   # Set starting defaults to one unit_length 
   #  and number of segments in circle to 16

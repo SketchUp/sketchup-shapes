@@ -43,7 +43,7 @@ not just a fixed default (usually 24 in the original plugin)
 - Initial default sizes on first use of a shape are selected according to the model units and
 unit format, usually one unit for length, height, width, depth or radius (feet, inches or
 metres) or for millimetre and centimetre units, 10 units (10 mm or 10 cm).
-- The initial default number of segments to draw is set at 16 for most shapes, and 5 per 90
+- The initial default number of segments to draw is set at 16 for most shapes, and 4 per 90
 degrees for Dome or Sphere. It can be changed by the user (and will be remembered for
 the duration of the Sketchup session).
 

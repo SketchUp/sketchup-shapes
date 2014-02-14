@@ -5,7 +5,7 @@
 # A SketchUp Ruby Extension that creates simple shape objects.  More info at  
 # https://github.com/SketchUp/shapes
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.1
+# Name        :   Shapes 1.4.5
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -33,7 +33,7 @@ shapes_ext = SketchupExtension.new "Shapes Tool", "su_shapes/shapes.rb"
 shapes_ext.description = "Shapes sample script from SketchUp.com"
 shapes_ext.version =  "1.4.5"
 shapes_ext.creator = "SketchUp"
-shapes_ext.copyright = "2014, Trimble Navigation Limited"
+shapes_ext.copyright = "2014, Trimble Navigation Limited and John W McClenahan"
 
 # Register the extension with Sketchup so it show up in the Preference panel.
 Sketchup.register_extension shapes_ext, true

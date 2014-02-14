@@ -508,10 +508,10 @@ def create_entities(data, container)
   @@segments = num_segments
 
   # Draw tube
-  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments
-  face = container.add_face outer
-  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments
-  inner[0].faces.each { |f| f.erase! if(f != face) }
+  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments # Draw outside end of the tube
+  face = container.add_face outer # Adds a face to the circle, to form the bottom of the outer tube
+  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments # Draw inside end of the tube
+  inner[0].faces.each { |f| f.erase! if(f != face) } # Erase the inner end face
   height = -height if face.normal.dot(Z_AXIS) < 0.0
   face.pushpull height
   

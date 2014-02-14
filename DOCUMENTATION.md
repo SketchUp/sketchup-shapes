@@ -50,14 +50,3 @@ the duration of the Sketchup session).
 [To make a permanent change to the initial default number of segments, edit the shapes.rb
 file default_parameters method for each shape Class, and change the line @@segments = 16 to
 your desired default.]
-##Installation
-In Sketchup v8 M2 or later (including Sketchup 2013 and 2014) - both free and pro versions - the plugin is installed in the normal way via the Window/Preferences/Extensions menu [Install Extension]
-(see http://help.sketchup.com/en/article/38583) or directly from the Window/Extensions
-Warehouse menu.
-
-It can then be activated or de-activated from the Window/Preferences/Extensions menu by
-ticking or un-ticking the box beside the plugin name. Shapes Tool.
-
-If you are using an older version of Sketchup, change the file extension of the plugin from
-.rbz to .zip, and extract the contents to the Sketchup Plugins folder (see the help article above
-for the default plugin folder location on Windows or Mac.)

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.5
+# Name        :   Shapes 1.4.6
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -33,7 +33,7 @@
 #             :   Draw->Shapes->Sphere
 # Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
 # Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-02-04
+# Date        :   2014-02-16
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 
@@ -112,20 +112,20 @@ def self.points_on_circle(center, normal, radius, numseg)
 
   # compute the points
   vertex_angle = 360.degrees / numseg
-  pts = []
+  points = []
 
   for i in 0...numseg do
     angle = i * vertex_angle
     cosa = Math.cos(angle)
     sina = Math.sin(angle)
     vec = Geom::Vector3d.linear_combination(cosa, xaxis, sina, yaxis)
-    pts.push(center + vec)
+    points.push(center + vec)
   end
 
   # close the circle
-  pts.push(pts[0].clone)
+  points.push(points[0].clone)
 
-  pts
+  points
 end
 
 #=============================================================================
@@ -144,8 +144,8 @@ def create_entities(data, container)
   @@dimension3 = height
 
   # Draw box
-  pts = [[0,0,0], [width,0,0], [width,depth,0], [0,depth,0], [0,0,0]]
-  base = container.add_face pts
+  points = [[0,0,0], [width,0,0], [width,depth,0], [0,depth,0], [0,0,0]]
+  base = container.add_face points
   height = -height if base.normal.dot(Z_AXIS) < 0.0
   base.pushpull height
 end
@@ -310,7 +310,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if(data["num_sides"] < 3)
+  if data["num_sides"] < 3
     UI.messagebox "At least 3 sides required"
     ok = false
   end
@@ -341,22 +341,22 @@ def create_entities(data, container)
   
   # Create the sides
   apex = [0,0,height]
-  e1 = nil
-  e2 = nil
+  edge1 = nil
+  edge2 = nil
   base_edges.each do |edge|
-    e2 = container.add_line edge.start.position, apex
-    e2.soft = true
-    e2.smooth = true
-    if(e1) 
-      container.add_face edge, e2, e1
+    edge2 = container.add_line edge.start.position, apex
+    edge2.soft = true
+    edge2.smooth = true
+    if edge1 
+      container.add_face edge, edge2, edge1
     end
-    e1 = e2
+    edge1 = edge2
   end
   
   # Create the last side face
   edge = base_edges[0]
   container.add_face edge.start.position, edge.end.position, apex
- end
+end
 
 def default_parameters
   # Set starting defaults to one unit_length 
@@ -418,14 +418,14 @@ def create_entities(data, container)
   @@segs2 = n2
   
   # Compute the cross-section circle points
-  pts = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
+  points = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
     [0, -1, 0], small_radius, n1)
   
   # Now create a polygon mesh and revolve these points
   numpts = n1*n2
   numpoly = numpts
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
-  mesh.add_revolved_points(pts, [ORIGIN, Z_AXIS], n2)
+  mesh.add_revolved_points(points, [ORIGIN, Z_AXIS], n2)
 
   # create faces from the mesh
   container.add_faces_from_mesh(mesh, 12)
@@ -436,7 +436,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that the small radius is no more than half the outer radius
-  if(data["small_radius"] > data["outer_radius"]/2.0)
+  if data["small_radius"] > data["outer_radius"]/2.0
     UI.messagebox "Small radius must be no more than half the outer radius"
     ok = false
   end
@@ -507,14 +507,19 @@ def create_entities(data, container)
   @@dimension3 = height
   @@segments = num_segments
 
-  # Draw tube
-  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments # Draw outside end of the tube
-  face = container.add_face outer # Adds a face to the circle, to form the bottom of the outer tube
-  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments # Draw inside end of the tube
-  inner[0].faces.each { |f| f.erase! if(f != face) } # Erase the inner end face
-  height = -height if face.normal.dot(Z_AXIS) < 0.0
-  face.pushpull height
-  
+# Draw tube
+  # Draw outside end of the tube
+  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments 
+  # Adds a face to the circle, to form the bottom of the outer tube
+  outer_face = container.add_face outer
+  # Draw inside end of the tube
+  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments
+  # Erase the inner end face
+  inner[0].faces.each { |f| f.erase! if f != outer_face }
+  # Pushpull the remaining annular face which is the cross section of the tube
+  height = -height if outer_face.normal.dot(Z_AXIS) < 0.0
+  outer_face.pushpull height
+
 end
  
 def default_parameters
@@ -547,7 +552,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that the thickness is less than the radius
-  if(data["thickness"] >= data["radius"])
+  if data["thickness"] >= data["radius"]
     UI.messagebox "Wall thickness must be smaller than radius"
     ok = false
   end
@@ -598,16 +603,16 @@ def create_entities(data, container)
   
   # Create the sides
   apex = [0,0,height]
-  e1 = nil
-  e2 = nil
+  edge1 = nil
+  edge2 = nil
   base_edges.each do |edge|
-    e2 = container.add_line edge.start.position, apex
-    e2.soft = false
-    e2.smooth = false
-    if(e1)
-      container.add_face edge, e2, e1
+    edge2 = container.add_line edge.start.position, apex
+    edge2.soft = false
+    edge2.smooth = false
+    if edge1
+      container.add_face edge, edge2, edge1
     end
-    e1 = e2
+    edge1 = edge2
   end # do
   
   # Create the last side face
@@ -658,7 +663,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if(data["num_segments"] < 3)
+  if data["num_segments"] < 3
     UI.messagebox "At least 3 sides required"
     ok = false
   end
@@ -824,7 +829,7 @@ end
 def validate_parameters(data)
   ok = true
 
-  if(data["num_segments"] < 1)
+  if data["num_segments"] < 1
     UI.messagebox "At least 1 segment required"
     ok = false
   end

@@ -5,7 +5,7 @@
 # A SketchUp Ruby Extension that creates simple shape objects.  More info at  
 # https://github.com/SketchUp/shapes
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.5
+# Name        :   Shapes 1.4.6
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -18,7 +18,7 @@
 #             :   Draw->Shapes->Sphere
 # Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
 # Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-02-04
+# Date        :   2014-02-16
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 

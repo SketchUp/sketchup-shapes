@@ -39,8 +39,8 @@
 
 # Add references to other needed Ruby functions
 require "sketchup.rb"
-require "su_shapes/parametric.rb"
-require "su_shapes/mesh_additions.rb"
+require File.join(File.dirname(__FILE__), 'parametric.rb')
+require File.join(File.dirname(__FILE__), 'mesh_additions.rb')
 
 module Sketchup::Samples::Shapes
 PLUGIN = self # Allows self reference later when calling function in module

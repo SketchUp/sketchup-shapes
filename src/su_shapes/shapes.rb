@@ -844,61 +844,57 @@ class Helix < Sketchup::Samples::Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
-  sradius = data["sradius"].to_l  # Starting radius
-  eradius = data["eradius"].to_l  # Ending radius
+  start_radius = data["start_radius"].to_l  # Starting radius
+  end_radius = data["end_radius"].to_l  # Ending radius
   pitch = data["pitch"].to_l  # Pitch
-  num_segments = data["num_segments"].to_int   # Number of sides
+  num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
   rotations = data["rotations"] # No of rotations (not necessarily integer)
 
   # Remember values for next use
-  @@dimension1 = sradius
-  @@dimension2 = eradius
+  @@dimension1 = start_radius
+  @@dimension2 = end_radius
   @@dimension3 = pitch
   @@segments = num_segments
   @@rotations = rotations
+
+  # In case rotations is negative (left hand spiral) take absolute value for total_segments  
+  total_segments = (num_segments * rotations).abs
+  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix 
+    angle    = 2 * Math::PI / num_segments
+  else 
+    if (rotations < 0.0 && pitch > 0.0) || (rotations > 0.0 && pitch < 0.0) # Left hand helix
+      angle    = -2 * Math::PI / num_segments
+    end
+  end
+  cosangle = Math.cos(angle)
+  sinangle = Math.sin(angle)
+
+  segment = 1
+  z_increment = pitch / num_segments
+
+  current_radius = start_radius
+  delta_radius = (end_radius - start_radius) / total_segments
+
+  points = []
+  x1 = current_radius
+  y1 = 0
+  z1 = 0
+  points[points.length] = [x1,y1,z1]
+
+  while segment < (total_segments + 1)
+      x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle)
+      y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle)
+      z2 = segment * z_increment
+      points[points.length] = [x2,y2,z2]
+      segment += 1
+  end
   
+  container.add_curve(points)
 
-        totalsec = num_segments * rotations
-        angle    = 2 * Math::PI / num_segments
-        cosangle = Math.cos(angle)
-        sinangle = Math.sin(angle)
-
-        section = 1
-        z0 = pitch / num_segments
-
-        r1 = sradius
-        dr = (eradius - sradius) / totalsec
-
-        pts = []
-        x1 = r1
-        y1 = 0
-        z1 = 0
-        pts[pts.length] = [x1,y1,z1]
-
-        while section < (totalsec + 1)
-            x2 = (r1 + (dr * section)) * Math.cos(section * angle)
-            y2 = (r1 + (dr * section)) * Math.sin(section * angle)
-            z2 = section * z0
-            pts[pts.length] = [x2,y2,z2]
-            section += 1
-        end
-
-        model = Sketchup.active_model
-        entities = model.active_entities
-        if Sketchup.version.to_f < 7.0
-            model.start_operation("DrawHelix14")
-        else
-            model.start_operation("DrawHelix", true)
-        end
-        group = entities.add_group
-        group.name = "Helix"
-        entities = group.entities
-        entities.add_curve(pts)
-        model.commit_operation
 end 
 
 def default_parameters
-  # Set starting defaults to one unit_length 
+  # Set starting defaults to one unit_length and one rotation along axis 
 
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 12 # per rotation if not previously defined
@@ -906,10 +902,10 @@ def default_parameters
   
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    defaults = { "sradius" => @@unit_length, "eradius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
+    defaults = { "start_radius" => @@unit_length, "end_radius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
   else
   # Reuse last inputs as defaults
-    defaults = { "sradius" => @@dimension1, "eradius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
+    defaults = { "start_radius" => @@dimension1, "end_radius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
   end # if 
 
   # Return values
@@ -920,14 +916,14 @@ def translate_key(key)
   prompt = key
 
   case key
-  when "sradius"
-    prompt = "Start Radius "
-  when "eradius"
-    prompt = "End Radius "
+  when "start_radius"
+    prompt = "Start radius "
+  when "end_radius"
+    prompt = "End radius "
   when "pitch"
-    prompt = "Pitch "
+    prompt = "Pitch (< 0.0 goes down) "
   when "rotations"
-    prompt = "No. of Rotations "
+    prompt = "No. of rotations (< 0.0 makes left hand helix) "
   when "num_segments"
     prompt = "Segments per rotation "
   end
@@ -939,8 +935,12 @@ end
 def validate_parameters(data)
   ok = true
 
-  if data["num_segments"] < 1
-    UI.messagebox "At least 1 segment required"
+  if data["rotations"].abs < 360.degrees/@@segments
+    UI.messagebox "No. of rotations too small - must allow at least one segment to be drawn"
+    ok = false
+  end
+  if data["num_segments"] < 2
+    UI.messagebox "At least 2 segments per rotation required"
     ok = false
   end
 

@@ -839,6 +839,116 @@ def validate_parameters(data)
 end
 
 end # Class Sphere
+
+class Helix < Sketchup::Samples::Parametric
+
+def create_entities(data, container)
+  # Set sizes to draw
+  sradius = data["sradius"].to_l  # Starting radius
+  eradius = data["eradius"].to_l  # Ending radius
+  pitch = data["pitch"].to_l  # Pitch
+  num_segments = data["num_segments"].to_int   # Number of sides
+  rotations = data["rotations"] # No of rotations (not necessarily integer)
+
+  # Remember values for next use
+  @@dimension1 = sradius
+  @@dimension2 = eradius
+  @@dimension3 = pitch
+  @@segments = num_segments
+  @@rotations = rotations
+  
+
+        totalsec = num_segments * rotations
+        angle    = 2 * Math::PI / num_segments
+        cosangle = Math.cos(angle)
+        sinangle = Math.sin(angle)
+
+        section = 1
+        z0 = pitch / num_segments
+
+        r1 = sradius
+        dr = (eradius - sradius) / totalsec
+
+        pts = []
+        x1 = r1
+        y1 = 0
+        z1 = 0
+        pts[pts.length] = [x1,y1,z1]
+
+        while section < (totalsec + 1)
+            x2 = (r1 + (dr * section)) * Math.cos(section * angle)
+            y2 = (r1 + (dr * section)) * Math.sin(section * angle)
+            z2 = section * z0
+            pts[pts.length] = [x2,y2,z2]
+            section += 1
+        end
+
+        model = Sketchup.active_model
+        entities = model.active_entities
+        if Sketchup.version.to_f < 7.0
+            model.start_operation("DrawHelix14")
+        else
+            model.start_operation("DrawHelix", true)
+        end
+        group = entities.add_group
+        group.name = "Helix"
+        entities = group.entities
+        entities.add_curve(pts)
+        model.commit_operation
+end 
+
+def default_parameters
+  # Set starting defaults to one unit_length 
+
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 12 # per rotation if not previously defined
+  @@rotations = 1.0
+  
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "sradius" => @@unit_length, "eradius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
+  else
+  # Reuse last inputs as defaults
+    defaults = { "sradius" => @@dimension1, "eradius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
+  end # if 
+
+  # Return values
+  defaults 
+end
+
+def translate_key(key)
+  prompt = key
+
+  case key
+  when "sradius"
+    prompt = "Start Radius "
+  when "eradius"
+    prompt = "End Radius "
+  when "pitch"
+    prompt = "Pitch "
+  when "rotations"
+    prompt = "No. of Rotations "
+  when "num_segments"
+    prompt = "Segments per rotation "
+  end
+
+  # Return value
+  prompt
+end
+
+def validate_parameters(data)
+  ok = true
+
+  if data["num_segments"] < 1
+    UI.messagebox "At least 1 segment required"
+    ok = false
+  end
+
+  # Return value
+  ok
+end
+
+end # Class Helix
 #=============================================================================
 
 # Add a menu for creating 3D shapes
@@ -855,7 +965,7 @@ unless file_loaded?(__FILE__) # If not, create menu entries
   shapes_menu.add_item("Pyramid") { Pyramid.new }
   shapes_menu.add_item("Dome") { Dome.new }
   shapes_menu.add_item("Sphere") { Sphere.new }
-
+  shapes_menu.add_item("Helix") { Helix.new }
   file_loaded(__FILE__)
 end
 

@@ -849,9 +849,11 @@ def create_entities(data, container)
   pitch = data["pitch"].to_l  # Pitch
   num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
   rotations = data["rotations"] # No of rotations (not necessarily integer)
-
+  start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
+  
   # Remember values for next use
   @@dimension1 = start_radius
+  @@start_angle = start_angle
   @@dimension2 = end_radius
   @@dimension3 = pitch
   @@segments = num_segments
@@ -868,6 +870,8 @@ def create_entities(data, container)
   end
   cosangle = Math.cos(angle)
   sinangle = Math.sin(angle)
+  cos_start_angle = Math.cos(start_angle.degrees)
+  sin_start_angle = Math.sin(start_angle.degrees)
 
   segment = 1
   z_increment = pitch / num_segments
@@ -876,14 +880,14 @@ def create_entities(data, container)
   delta_radius = (end_radius - start_radius) / total_segments
 
   points = []
-  x1 = current_radius
-  y1 = 0
+  x1 = current_radius * cos_start_angle
+  y1 = current_radius * sin_start_angle
   z1 = 0
   points[points.length] = [x1,y1,z1]
 
   while segment < (total_segments + 1)
-      x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle)
-      y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle)
+      x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
+      y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
       z2 = segment * z_increment
       points[points.length] = [x2,y2,z2]
       segment += 1
@@ -899,13 +903,14 @@ def default_parameters
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 12 # per rotation if not previously defined
   @@rotations = 1.0
+  @@start_angle = 0.0
   
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    defaults = { "start_radius" => @@unit_length, "end_radius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
+    defaults = { "start_radius" => @@unit_length, "start_angle" => 0.0, "end_radius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
   else
   # Reuse last inputs as defaults
-    defaults = { "start_radius" => @@dimension1, "end_radius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
+    defaults = { "start_radius" => @@dimension1, "start_angle" => @@start_angle, "end_radius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
   end # if 
 
   # Return values
@@ -918,6 +923,8 @@ def translate_key(key)
   case key
   when "start_radius"
     prompt = "Start radius "
+  when "start_angle"
+    prompt = "Start at (angle in degrees) "
   when "end_radius"
     prompt = "End radius "
   when "pitch"

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.6
+# Name        :   Shapes 1.5
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -31,9 +31,10 @@
 #             :   Draw->Shapes->Pyramid
 #             :   Draw->Shapes->Dome
 #             :   Draw->Shapes->Sphere
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
+#             :   Draw->Shapes->Helix
+# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere|Helix
 # Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-02-16
+# Date        :   2014-03-23
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 

@@ -41,3 +41,7 @@ Fixed a few if statements with overlooked parentheses round condition
 Replaced the few remaining cryptic abbreviations with more descriptive names
   e1, e2 to edge1, edge2
   pts to points
+
+##v1.5 2014-03-23
+Added new Shape - Helix, based on adaptation of Jim Foltz's DrawHelix14.rb, which in turn
+was based on Peter Brown's DrawHelix13.rb (2004). The adaptation allows negative Pitch (to draw helix downwards) and/or negative No. of rotations, to draw left hand helix instead of right hand, and adds another editable parameter for the angle at which to start drawing the helix.

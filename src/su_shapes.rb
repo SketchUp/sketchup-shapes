@@ -16,9 +16,10 @@
 #             :   Draw->Shapes->Pyramid
 #             :   Draw->Shapes->Dome
 #             :   Draw->Shapes->Sphere
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
+#             :   Draw->Shapes->Helix
+# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere|Helix
 # Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-02-16
+# Date        :   2014-03-23
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ module Shapes
 # Create the extension.
 shapes_ext = SketchupExtension.new "Shapes Tool", "su_shapes/shapes.rb"
 shapes_ext.description = "Shapes sample script from SketchUp.com"
-shapes_ext.version =  "1.4.5"
+shapes_ext.version =  "1.5"
 shapes_ext.creator = "SketchUp"
 shapes_ext.copyright = "2014, Trimble Navigation Limited and John W McClenahan"
 

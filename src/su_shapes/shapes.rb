@@ -899,10 +899,10 @@ def create_entities(data, container)
 end 
 
 def default_parameters
-  # Set starting defaults to one unit_length and one rotation along axis 
+  # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis 
 
   @@unit_length = PLUGIN.unit_length
-  @@segments ||= 12 # per rotation if not previously defined
+  @@segments ||= 16 # per rotation if not previously defined
   @@rotations = 1.0
   @@start_angle = 0.0
   
@@ -929,9 +929,9 @@ def translate_key(key)
   when "end_radius"
     prompt = "End radius "
   when "pitch"
-    prompt = "Pitch (< 0.0 goes down) "
+    prompt = "Pitch (if negative, helix goes down) "
   when "rotations"
-    prompt = "No. of rotations (< 0.0 makes left hand helix) "
+    prompt = "No. of rotations (if negative, makes left hand helix) "
   when "num_segments"
     prompt = "Segments per rotation "
   end

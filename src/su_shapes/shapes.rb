@@ -473,13 +473,18 @@ def create_entities(data, container)
   @@dimension3 = height
   @@segments = num_segments
 
-  # Draw tube
-  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments # Draw outside end of the tube
-  face = container.add_face outer # Adds a face to the circle, to form the bottom of the outer tube
-  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments # Draw inside end of the tube
-  inner[0].faces.each { |f| f.erase! if(f != face) } # Erase the inner end face
-  height = -height if face.normal.dot(Z_AXIS) < 0.0
-  face.pushpull height
+  # Draw outer loop of tube.
+  outer_edges = container.add_circle(ORIGIN, Z_AXIS, outer_radius, num_segments)
+  # Adds a face to the circle, to form the bottom of the tube.
+  profile_face = container.add_face(outer_edges)
+  # Draw the inner loop of the tuby profile and remove the inner face.
+  inner_edges = container.add_circle(ORIGIN, Z_AXIS, inner_radius, num_segments)
+  inner_face = inner_edges.first.faces.find { |face| face != profile_face }
+  inner_face.erase!
+  # Ensure the face is extruded upwards.
+  profile_face.reverse! if profile_face.normal.samedirection?(Z_AXIS.reverse)
+  # Extrude the profile into a tube.
+  profile_face.pushpull(height)
 
 end
 

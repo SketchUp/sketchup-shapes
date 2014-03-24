@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.5
+# Name        :   Shapes 1.5
 # Description :   Classes for creating and editing parametric shapes
 # Menu Item   :   Draw->Shapes->Box
 #             :   Draw->Shapes->Cylinder
@@ -31,9 +31,10 @@
 #             :   Draw->Shapes->Pyramid
 #             :   Draw->Shapes->Dome
 #             :   Draw->Shapes->Sphere
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere
+#             :   Draw->Shapes->Helix
+# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere|Helix
 # Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-02-04
+# Date        :   2014-03-23
 # Type        :   Dialog Box
 #-----------------------------------------------------------------------------
 
@@ -112,20 +113,20 @@ def self.points_on_circle(center, normal, radius, numseg)
 
   # compute the points
   vertex_angle = 360.degrees / numseg
-  pts = []
+  points = []
 
   for i in 0...numseg do
     angle = i * vertex_angle
     cosa = Math.cos(angle)
     sina = Math.sin(angle)
     vec = Geom::Vector3d.linear_combination(cosa, xaxis, sina, yaxis)
-    pts.push(center + vec)
+    points.push(center + vec)
   end
 
   # close the circle
-  pts.push(pts[0].clone)
+  points.push(points[0].clone)
 
-  pts
+  points
 end
 
 #=============================================================================
@@ -144,8 +145,8 @@ def create_entities(data, container)
   @@dimension3 = height
 
   # Draw box
-  pts = [[0,0,0], [width,0,0], [width,depth,0], [0,depth,0], [0,0,0]]
-  base = container.add_face pts
+  points = [[0,0,0], [width,0,0], [width,depth,0], [0,depth,0], [0,0,0]]
+  base = container.add_face points
   height = -height if base.normal.dot(Z_AXIS) < 0.0
   base.pushpull height
 end
@@ -310,7 +311,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if(data["num_sides"] < 3)
+  if data["num_sides"] < 3
     UI.messagebox "At least 3 sides required"
     ok = false
   end
@@ -341,22 +342,22 @@ def create_entities(data, container)
   
   # Create the sides
   apex = [0,0,height]
-  e1 = nil
-  e2 = nil
+  edge1 = nil
+  edge2 = nil
   base_edges.each do |edge|
-    e2 = container.add_line edge.start.position, apex
-    e2.soft = true
-    e2.smooth = true
-    if(e1) 
-      container.add_face edge, e2, e1
+    edge2 = container.add_line edge.start.position, apex
+    edge2.soft = true
+    edge2.smooth = true
+    if edge1 
+      container.add_face edge, edge2, edge1
     end
-    e1 = e2
+    edge1 = edge2
   end
   
   # Create the last side face
   edge = base_edges[0]
   container.add_face edge.start.position, edge.end.position, apex
- end
+end
 
 def default_parameters
   # Set starting defaults to one unit_length 
@@ -418,14 +419,14 @@ def create_entities(data, container)
   @@segs2 = n2
   
   # Compute the cross-section circle points
-  pts = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
+  points = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
     [0, -1, 0], small_radius, n1)
   
   # Now create a polygon mesh and revolve these points
   numpts = n1*n2
   numpoly = numpts
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
-  mesh.add_revolved_points(pts, [ORIGIN, Z_AXIS], n2)
+  mesh.add_revolved_points(points, [ORIGIN, Z_AXIS], n2)
 
   # create faces from the mesh
   container.add_faces_from_mesh(mesh, 12)
@@ -436,7 +437,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that the small radius is no more than half the outer radius
-  if(data["small_radius"] > data["outer_radius"]/2.0)
+  if data["small_radius"] > data["outer_radius"]/2.0
     UI.messagebox "Small radius must be no more than half the outer radius"
     ok = false
   end
@@ -507,14 +508,19 @@ def create_entities(data, container)
   @@dimension3 = height
   @@segments = num_segments
 
-  # Draw tube
-  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments # Draw outside end of the tube
-  face = container.add_face outer # Adds a face to the circle, to form the bottom of the outer tube
-  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments # Draw inside end of the tube
-  inner[0].faces.each { |f| f.erase! if(f != face) } # Erase the inner end face
-  height = -height if face.normal.dot(Z_AXIS) < 0.0
-  face.pushpull height
-  
+# Draw tube
+  # Draw outside end of the tube
+  outer = container.add_circle ORIGIN, Z_AXIS, outer_radius, num_segments 
+  # Adds a face to the circle, to form the bottom of the outer tube
+  outer_face = container.add_face outer
+  # Draw inside end of the tube
+  inner = container.add_circle ORIGIN, Z_AXIS, inner_radius, num_segments
+  # Erase the inner end face
+  inner[0].faces.each { |f| f.erase! if f != outer_face }
+  # Pushpull the remaining annular face which is the cross section of the tube
+  height = -height if outer_face.normal.dot(Z_AXIS) < 0.0
+  outer_face.pushpull height
+
 end
  
 def default_parameters
@@ -547,7 +553,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that the thickness is less than the radius
-  if(data["thickness"] >= data["radius"])
+  if data["thickness"] >= data["radius"]
     UI.messagebox "Wall thickness must be smaller than radius"
     ok = false
   end
@@ -598,16 +604,16 @@ def create_entities(data, container)
   
   # Create the sides
   apex = [0,0,height]
-  e1 = nil
-  e2 = nil
+  edge1 = nil
+  edge2 = nil
   base_edges.each do |edge|
-    e2 = container.add_line edge.start.position, apex
-    e2.soft = false
-    e2.smooth = false
-    if(e1)
-      container.add_face edge, e2, e1
+    edge2 = container.add_line edge.start.position, apex
+    edge2.soft = false
+    edge2.smooth = false
+    if edge1
+      container.add_face edge, edge2, edge1
     end
-    e1 = e2
+    edge1 = edge2
   end # do
   
   # Create the last side face
@@ -658,7 +664,7 @@ def validate_parameters(data)
   ok = true
 
   # make sure that there are at least 3 sides
-  if(data["num_segments"] < 3)
+  if data["num_segments"] < 3
     UI.messagebox "At least 3 sides required"
     ok = false
   end
@@ -824,7 +830,7 @@ end
 def validate_parameters(data)
   ok = true
 
-  if(data["num_segments"] < 1)
+  if data["num_segments"] < 1
     UI.messagebox "At least 1 segment required"
     ok = false
   end
@@ -834,6 +840,123 @@ def validate_parameters(data)
 end
 
 end # Class Sphere
+
+class Helix < Sketchup::Samples::Parametric
+
+def create_entities(data, container)
+  # Set sizes to draw
+  start_radius = data["start_radius"].to_l  # Starting radius
+  end_radius = data["end_radius"].to_l  # Ending radius
+  pitch = data["pitch"].to_l  # Pitch
+  num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
+  rotations = data["rotations"] # No of rotations (not necessarily integer)
+  start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
+  
+  # Remember values for next use
+  @@dimension1 = start_radius
+  @@start_angle = start_angle
+  @@dimension2 = end_radius
+  @@dimension3 = pitch
+  @@segments = num_segments
+  @@rotations = rotations
+
+  # In case rotations is negative (left hand spiral) take absolute value for total_segments  
+  total_segments = (num_segments * rotations).abs
+  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix 
+    angle    = 2 * Math::PI / num_segments
+  else 
+    if (rotations < 0.0 && pitch > 0.0) || (rotations > 0.0 && pitch < 0.0) # Left hand helix
+      angle    = -2 * Math::PI / num_segments
+    end
+  end
+  cosangle = Math.cos(angle)
+  sinangle = Math.sin(angle)
+  cos_start_angle = Math.cos(start_angle.degrees)
+  sin_start_angle = Math.sin(start_angle.degrees)
+
+  segment = 1
+  z_increment = pitch / num_segments
+
+  current_radius = start_radius
+  delta_radius = (end_radius - start_radius) / total_segments
+
+  points = []
+  x1 = current_radius * cos_start_angle
+  y1 = current_radius * sin_start_angle
+  z1 = 0
+  points[points.length] = [x1,y1,z1]
+
+  while segment < (total_segments + 1)
+      x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
+      y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
+      z2 = segment * z_increment
+      points[points.length] = [x2,y2,z2]
+      segment += 1
+  end
+  
+  container.add_curve(points)
+
+end 
+
+def default_parameters
+  # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis 
+
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 16 # per rotation if not previously defined
+  @@rotations = 1.0
+  @@start_angle = 0.0
+  
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "start_radius" => @@unit_length, "start_angle" => 0.0, "end_radius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
+  else
+  # Reuse last inputs as defaults
+    defaults = { "start_radius" => @@dimension1, "start_angle" => @@start_angle, "end_radius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
+  end # if 
+
+  # Return values
+  defaults 
+end
+
+def translate_key(key)
+  prompt = key
+
+  case key
+  when "start_radius"
+    prompt = "Start radius "
+  when "start_angle"
+    prompt = "Start at (angle in degrees) "
+  when "end_radius"
+    prompt = "End radius "
+  when "pitch"
+    prompt = "Pitch (if negative, helix goes down) "
+  when "rotations"
+    prompt = "No. of rotations (if negative, makes left hand helix) "
+  when "num_segments"
+    prompt = "Segments per rotation "
+  end
+
+  # Return value
+  prompt
+end
+
+def validate_parameters(data)
+  ok = true
+
+  if data["rotations"].abs < 360.degrees/@@segments
+    UI.messagebox "No. of rotations too small - must allow at least one segment to be drawn"
+    ok = false
+  end
+  if data["num_segments"] < 2
+    UI.messagebox "At least 2 segments per rotation required"
+    ok = false
+  end
+
+  # Return value
+  ok
+end
+
+end # Class Helix
 #=============================================================================
 
 # Add a menu for creating 3D shapes
@@ -850,7 +973,7 @@ unless file_loaded?(__FILE__) # If not, create menu entries
   shapes_menu.add_item("Pyramid") { Pyramid.new }
   shapes_menu.add_item("Dome") { Dome.new }
   shapes_menu.add_item("Sphere") { Sphere.new }
-
+  shapes_menu.add_item("Helix") { Helix.new }
   file_loaded(__FILE__)
 end
 

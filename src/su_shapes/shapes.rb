@@ -9,7 +9,7 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in 
+# The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -42,11 +42,11 @@ require "sketchup.rb"
 require File.join(File.dirname(__FILE__), 'parametric.rb')
 require File.join(File.dirname(__FILE__), 'mesh_additions.rb')
 
-module Sketchup::Samples::Shapes
+module CommunityExtensions::Shapes
 PLUGIN = self # Allows self reference later when calling function in module
 
 #=============================================================================
-# Find which unit and format the model is using and define unit_length 
+# Find which unit and format the model is using and define unit_length
 #   accordingly
 	# When LengthUnit = 0
 		# LengthFormat 0 = Decimal inches
@@ -72,32 +72,32 @@ def self.unit_length
 
     case length_unit
     when 0 ## Imperial units
-      if length_format == 1 || length_format == 2  
-      # model is using Architectural (feet and inches) 
-      # or Engineering units (feet)  
-      unit_length = 1.feet 
+      if length_format == 1 || length_format == 2
+      # model is using Architectural (feet and inches)
+      # or Engineering units (feet)
+      unit_length = 1.feet
       else
       ## model is using (decimal or fractional) inches
       unit_length = 1.inch
       end # if
-    when 1 
+    when 1
       ## Decimal feet
-      unit_length = 1.feet 
+      unit_length = 1.feet
     when 2
       ## model is using metric units - millimetres
       unit_length = 10.mm
-    when 3 
+    when 3
       ## model is using metric units - centimetres
       unit_length = 10.cm
     when 4
       ## model is using metric units - metres
-      unit_length =  1.m 
+      unit_length =  1.m
     end #end case
 
-  else 
+  else
     UI.messagebox " Can't determine model units - please set in Window/ModelInfo"
-  end # if  
-end 
+  end # if
+end
 #=============================================================================
 # Function for generating points on a circle
 def self.points_on_circle(center, normal, radius, numseg)
@@ -130,7 +130,7 @@ end
 
 #=============================================================================
 
-class Box < Sketchup::Samples::Parametric
+class Box < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set values from input data
@@ -139,7 +139,7 @@ def create_entities(data, container)
   height = data["height"].to_l # height
 
   # Remember values for next use
-  @@dimension1 = width 
+  @@dimension1 = width
   @@dimension2 = depth
   @@dimension3 = height
 
@@ -156,7 +156,7 @@ def default_parameters
 
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    defaults = { "width" => @@unit_length, "depth" => @@unit_length, 
+    defaults = { "width" => @@unit_length, "depth" => @@unit_length,
       "height" => @@unit_length }
   else
     # Reuse last inputs as defaults
@@ -184,7 +184,7 @@ end # Class Box
 
 #=============================================================================
 
-class Cylinder < Sketchup::Samples::Parametric
+class Cylinder < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   radius = data["radius"].to_l # Radius
@@ -206,7 +206,7 @@ def create_entities(data, container)
   end
 
 def default_parameters
-  # Set starting defaults to one unit_length and 
+  # Set starting defaults to one unit_length and
   #   number of segments in circle to 16
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 16  # Set to 16 if not previously defined
@@ -245,7 +245,7 @@ end # Class Cylinder
 
 #=============================================================================
 
-class Prism < Sketchup::Samples::Parametric
+class Prism < CommunityExtensions::Parametric
 
 def create_entities(data, container)
 
@@ -264,7 +264,7 @@ def create_entities(data, container)
   base = container.add_face circle
   height = -height if base.normal.dot(Z_AXIS) < 0.0
   base.pushpull height
-  
+
 end
 
 def default_parameters
@@ -320,7 +320,7 @@ end
 end # class Prism
 #=============================================================================
 
-class Cone < Sketchup::Samples::Parametric
+class Cone < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set size to draw
@@ -328,17 +328,17 @@ def create_entities(data, container)
   height = data["height"].to_l # Height to apex
   # Number of segments in circle (was originally fixed at num_segments=24)
   num_segments = data["num_segments"].to_int
-  
+
   # Remember values for next use
   @@dimension1 = radius
   @@dimension2 = height
   @@segments = num_segments
-  
+
   # Create the base
   circle = container.add_circle ORIGIN, Z_AXIS, radius, num_segments
   base = container.add_face circle
-  base_edges = base.edges 
-  
+  base_edges = base.edges
+
   # Create the sides
   apex = [0,0,height]
   e1 = nil
@@ -347,19 +347,19 @@ def create_entities(data, container)
     e2 = container.add_line edge.start.position, apex
     e2.soft = true
     e2.smooth = true
-    if(e1) 
+    if(e1)
       container.add_face edge, e2, e1
     end
     e1 = e2
   end
-  
+
   # Create the last side face
   edge = base_edges[0]
   container.add_face edge.start.position, edge.end.position, apex
  end
 
 def default_parameters
-  # Set starting defaults to one unit_length 
+  # Set starting defaults to one unit_length
   #   and number of segments in circle to 16
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 16 # Set to 16 if not previously defined
@@ -397,14 +397,14 @@ end
 end # Class Cone
 
 #=============================================================================
-class Torus < Sketchup::Samples::Parametric
+class Torus < CommunityExtensions::Parametric
 
 def create_entities(data, container)
 
   # Set sizes to draw
   # small radius of torus (radius of revolved circle)
   small_radius = data["small_radius"].to_l
-  # large radius (outer radius to outside of torus)  
+  # large radius (outer radius to outside of torus)
   outer_radius = data["outer_radius"].to_l
   # segments in small radius (added by JWM)
   n1 = data["s1"].to_int
@@ -416,11 +416,11 @@ def create_entities(data, container)
   @@dimension2 = outer_radius
   @@segs1 = n1
   @@segs2 = n2
-  
+
   # Compute the cross-section circle points
   pts = PLUGIN.points_on_circle([outer_radius -small_radius, 0, 0],
     [0, -1, 0], small_radius, n1)
-  
+
   # Now create a polygon mesh and revolve these points
   numpts = n1*n2
   numpoly = numpts
@@ -429,7 +429,7 @@ def create_entities(data, container)
 
   # create faces from the mesh
   container.add_faces_from_mesh(mesh, 12)
-  
+
 end
 
 def validate_parameters(data)
@@ -445,7 +445,7 @@ def validate_parameters(data)
 end
 
 def default_parameters
-  # Set starting defaults to one unit_length 
+  # Set starting defaults to one unit_length
   #   and number of segments in circle to 16
   @@unit_length = PLUGIN.unit_length
 
@@ -455,7 +455,7 @@ def default_parameters
 
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
-    # set defaults: outer radius = one unit_length, small radius one quarter 
+    # set defaults: outer radius = one unit_length, small radius one quarter
     defaults = { "small_radius" => (@@unit_length/4.0).to_l,
       "outer_radius" => @@unit_length, "s1" => @@segs1,"s2" => @@segs2 }
   else
@@ -490,7 +490,7 @@ end # Class Torus
 
 #=============================================================================
 
-class Tube < Sketchup::Samples::Parametric
+class Tube < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -499,7 +499,7 @@ def create_entities(data, container)
   inner_radius = outer_radius - thickness      # Inner radius
   height = data["height"].to_l  # Height
   # Number of segments to use for circle (was originally at 24)
-  num_segments = data["num_segments"].to_int 
+  num_segments = data["num_segments"].to_int
 
   # Remember values for next use
   @@dimension1 = outer_radius
@@ -514,11 +514,11 @@ def create_entities(data, container)
   inner[0].faces.each { |f| f.erase! if(f != face) } # Erase the inner end face
   height = -height if face.normal.dot(Z_AXIS) < 0.0
   face.pushpull height
-  
+
 end
- 
+
 def default_parameters
-  # Set starting defaults to one unit_length 
+  # Set starting defaults to one unit_length
   #  and number of segments in circle to 16
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 16 # Set to 16 if not defined
@@ -533,7 +533,7 @@ def default_parameters
     defaults = { "radius" => @@dimension1, "thickness" => @@dimension2,
       "height" => @@dimension3,
       "num_segments" => @@segments }
-  end # if 
+  end # if
 
   # Original parameters
   # defaults = { "radius", 2.feet, "thickness", 3.inch, "height",
@@ -577,7 +577,7 @@ end #Class Tube
 
 #=============================================================================
 
-class Pyramid < Sketchup::Samples::Parametric
+class Pyramid < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -589,13 +589,13 @@ def create_entities(data, container)
   @@dimension1 = radius
   @@dimension2 = height
   @@segments = num_segments
-  
+
   # Draw base and define apex point
   circle = container.add_ngon ORIGIN, Z_AXIS, radius, num_segments
   base = container.add_face circle
   apex = [0,0,height]
-  base_edges = base.edges 
-  
+  base_edges = base.edges
+
   # Create the sides
   apex = [0,0,height]
   e1 = nil
@@ -609,10 +609,10 @@ def create_entities(data, container)
     end
     e1 = e2
   end # do
-  
+
   # Create the last side face
   edge = base_edges[0]
-  container.add_face edge.start.position, edge.end.position, apex   
+  container.add_face edge.start.position, edge.end.position, apex
 end
 
 def default_parameters
@@ -671,18 +671,18 @@ end # Class Pyramid
 
 #=============================================================================
 
-class Dome < Sketchup::Samples::Parametric
+class Dome < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
   radius = data["radius"].to_l  # Base radius
   n90 = data["num_segments"].to_i  # Number of segments per 90 degrees
-  smooth = 12  # smooth 
+  smooth = 12  # smooth
 
   # Remember values for next use
   @@dimension1 = radius
   @@segments = n90
-  
+
   # Compute a quarter circle
   arcpts = []
   delta = 90.degrees/n90
@@ -715,10 +715,10 @@ def default_parameters
   else
   # Reuse last inputs as defaults
     defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
-  end # if 
-  
+  end # if
+
   # Original default values
-  #   defaults = { "radius", 2.feet, "num_segments", 5 } 
+  #   defaults = { "radius", 2.feet, "num_segments", 5 }
 
   # Return values
   defaults
@@ -753,7 +753,7 @@ end
 end # Class Dome
 
 #======================================================
-class Sphere < Sketchup::Samples::Parametric
+class Sphere < CommunityExtensions::Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -764,7 +764,7 @@ def create_entities(data, container)
   # Remember values for next use
   @@dimension1 = radius
   @@segments = n90
-  
+
   # Compute a half circle
   arcpts = []
   delta = 90.degrees/n90
@@ -774,7 +774,7 @@ def create_entities(data, container)
     sina = Math.sin(angle)
     arcpts.push(Geom::Point3d.new(radius*cosa, 0, radius*sina))
   end
-  
+
   # Create a mesh and revolve the half circle
   numpoly = n90*n90*4
   numpts = numpoly + 1
@@ -783,11 +783,11 @@ def create_entities(data, container)
 
   # Create faces from the mesh
   container.add_faces_from_mesh(mesh, smooth)
-  
+
 end
 
 def default_parameters
-  # Set starting defaults to one unit_length 
+  # Set starting defaults to one unit_length
   #   and number of segments per 90 degrees to 4
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 4 # per 90 degrees if not previously defined
@@ -798,10 +798,10 @@ def default_parameters
   else
   # Reuse last inputs as defaults
     defaults = { "radius" => @@dimension1, "num_segments" => @@segments }
-  end # if 
-  
+  end # if
+
   # Original defaults
-  #   defaults = { "radius", 2.feet, "num_segments", 5 } 
+  #   defaults = { "radius", 2.feet, "num_segments", 5 }
 
   # Return values
   defaults
@@ -854,4 +854,4 @@ unless file_loaded?(__FILE__) # If not, create menu entries
   file_loaded(__FILE__)
 end
 
-end # module Sketchup::Samples::Shapes
+end # module CommunityExtensions::Shapes

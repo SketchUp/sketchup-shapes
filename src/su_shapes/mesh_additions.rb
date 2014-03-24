@@ -148,7 +148,7 @@ end
 
 end # Geom::PolygonMesh
 
-module Sketchup::Samples
+module CommunityExtensions
 
 def self.revolve_test(num)
     p0 = Geom::Point3d.new 0, 0, -50
@@ -188,4 +188,4 @@ def self.extrude_test(dist, angle, num)
     true
 end
 
-end # module Sketchup::Samples
+end # module CommunityExtensions

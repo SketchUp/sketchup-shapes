@@ -2,7 +2,7 @@
 #
 # License: The MIT License (MIT)
 #
-# A SketchUp Ruby Extension that creates simple shape objects.  More info at  
+# A SketchUp Ruby Extension that creates simple shape objects.  More info at
 # https://github.com/SketchUp/shapes
 #-----------------------------------------------------------------------------
 # Name        :   Shapes 1.4.5
@@ -25,7 +25,7 @@
 require "sketchup.rb"
 require "extensions.rb"
 
-module Sketchup::Samples
+module CommunityExtensions
   module Shapes
 
     # Create the extension.
@@ -40,4 +40,4 @@ module Sketchup::Samples
     Sketchup.register_extension shapes_ext, true
 
   end # module Shapes
-end # module Sketchup::Samples
+end # module CommunityExtensions

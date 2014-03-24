@@ -36,7 +36,7 @@
 require 'sketchup.rb'
 
 #=============================================================================
-module Sketchup::Samples
+module CommunityExtensions
 
 class Parametric
 
@@ -338,4 +338,4 @@ if (not $parametric_loaded)
     end
 end
 
-end # module Sketchup::Samples
+end # module CommunityExtensions

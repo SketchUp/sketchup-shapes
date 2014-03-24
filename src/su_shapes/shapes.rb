@@ -439,13 +439,13 @@ def translate_key(key)
   prompt = key
   case key
   when "small_radius"
-    prompt = "Small Radius "
+    prompt = "Profile Radius "
   when "outer_radius"
-    prompt = "Outer Radius "
+    prompt = "Torus Radius "
   when "s1"
-    prompt = "Segments - small " # added as parameter by JWM
+    prompt = "Profile Segments "
   when "s2"
-    prompt = "Segments - outer " #added as parameter by JWM
+    prompt = "Torus segments "
   end
 
   # Return value

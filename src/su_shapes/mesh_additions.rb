@@ -1,32 +1,7 @@
-# The MIT License (MIT)
+# Copyright 2014 Trimble Navigation Ltd.
+#
+# License: The MIT License (MIT)
 
-# Copyright (c) 2014 Trimble Navigation Ltd.
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#-----------------------------------------------------------------------------
-# Name        :   Mesh Additions 1.0
-# Description :   This file defines some additional methods for Geom::PoygonMesh
-# Menu Item   :   NONE
-# Context Menu:   NONE
-# Date        :   9/16/2004
-# Type        :   Utils
-#-----------------------------------------------------------------------------
 
 # We are adding new methods to the existing class
 class Geom::PolygonMesh
@@ -147,45 +122,3 @@ def add_extruded_points(pts, center, dir, angle, numsegments)
 end
 
 end # Geom::PolygonMesh
-
-module CommunityExtensions
-
-def self.revolve_test(num)
-    p0 = Geom::Point3d.new 0, 0, -50
-    p1 = Geom::Point3d.new 100, 0, 0
-    p2 = Geom::Point3d.new 50, 0, 50
-    p3 = Geom::Point3d.new 0, 0, 75
-    pts = [p1, p2]
-    axis = [Geom::Point3d.new(0, 0, 0), Geom::Vector3d.new(-10, -1, 50)]
-
-    npts = pts.length
-    numpts = npts * num
-    numpoly = (npts-1)*num
-    mesh = Geom::PolygonMesh.new numpts, numpoly
-
-    mesh.add_revolved_points pts, axis, num
-
-    Sketchup.active_model.entities.add_faces_from_mesh mesh, 0
-end
-
-def self.extrude_test(dist, angle, num)
-    model = Sketchup.active_model
-    face = model.selection.first
-    if( not face.kind_of?(Sketchup::Face) )
-        puts "You must select a Face"
-        return
-    end
-    pts = face.outer_loop.vertices.collect {|v| v.position}
-    numpts = num * pts.length
-    numpoly = (numpts - pts.length) * 2
-    mesh = Geom::PolygonMesh.new numpts, numpoly
-
-    vec = Geom::Vector3d.new 0, 0, dist
-    mesh.add_extruded_points pts, ORIGIN, vec, angle, num
-
-    model.entities.add_faces_from_mesh mesh, 9
-
-    true
-end
-
-end # module CommunityExtensions

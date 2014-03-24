@@ -13,22 +13,22 @@ PLUGIN = self # Allows self reference later when calling function in module
 #=============================================================================
 # Find which unit and format the model is using and define unit_length
 #   accordingly
-	# When LengthUnit = 0
-		# LengthFormat 0 = Decimal inches
-		# LengthFormat 1 = Architectural (feet and inches)
-		# LengthFormat 2 = Engineering (feet)
-		# LengthFormat 3 = Fractional (inches)
-	# When LengthUnit = 1
-		# LengthFormat 0 = Decimal feet
-	# When LengthUnit = 2
-		# LengthFormat 0 = Decimal mm
-	# When LengthUnit = 3
-		# LengthFormat 0 = Decimal cm
-	# When LengthUnit = 4
-		# LengthFormat 0 = Decimal metres
+#   When LengthUnit = 0
+#     LengthFormat 0 = Decimal inches
+#     LengthFormat 1 = Architectural (feet and inches)
+#     LengthFormat 2 = Engineering (feet)
+#     LengthFormat 3 = Fractional (inches)
+#   When LengthUnit = 1
+#     LengthFormat 0 = Decimal feet
+#   When LengthUnit = 2
+#     LengthFormat 0 = Decimal mm
+#   When LengthUnit = 3
+#     LengthFormat 0 = Decimal cm
+#   When LengthUnit = 4
+#     LengthFormat 0 = Decimal metres
 
 def self.unit_length
-# Get model units (imperial or metric) and length format
+  # Get model units (imperial or metric) and length format.
   model = Sketchup.active_model
   manager = model.options
   if provider = manager["UnitsOptions"] # Check for nil value
@@ -390,6 +390,7 @@ def create_entities(data, container)
   numpts = n1*n2
   numpoly = numpts
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
+  mesh.extend(PolygonMeshHelper)
   mesh.add_revolved_points(pts, [ORIGIN, Z_AXIS], n2)
 
   # create faces from the mesh
@@ -662,6 +663,7 @@ def create_entities(data, container)
   numpoly = n90*n90*4
   numpts = numpoly + 1
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
+  mesh.extend(PolygonMeshHelper)
   mesh.add_revolved_points(arcpts, [ORIGIN, Z_AXIS], n90*4)
 
   # Create faces from the mesh
@@ -744,6 +746,7 @@ def create_entities(data, container)
   numpoly = n90*n90*4
   numpts = numpoly + 1
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
+  mesh.extend(PolygonMeshHelper)
   mesh.add_revolved_points(arcpts, [ORIGIN, Z_AXIS], n90*4)
 
   # Create faces from the mesh

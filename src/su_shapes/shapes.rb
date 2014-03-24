@@ -312,7 +312,7 @@ def create_entities(data, container)
     edge2 = container.add_line edge.start.position, apex
     edge2.soft = true
     edge2.smooth = true
-    if edge1 
+    if edge1
       container.add_face edge, edge2, edge1
     end
     edge1 = edge2
@@ -808,7 +808,7 @@ end
 
 end # Class Sphere
 
-class Helix < Sketchup::Samples::Parametric
+class Helix < Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -818,7 +818,7 @@ def create_entities(data, container)
   num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
   rotations = data["rotations"] # No of rotations (not necessarily integer)
   start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
-  
+
   # Remember values for next use
   @@dimension1 = start_radius
   @@start_angle = start_angle
@@ -827,11 +827,11 @@ def create_entities(data, container)
   @@segments = num_segments
   @@rotations = rotations
 
-  # In case rotations is negative (left hand spiral) take absolute value for total_segments  
+  # In case rotations is negative (left hand spiral) take absolute value for total_segments
   total_segments = (num_segments * rotations).abs
-  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix 
+  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix
     angle    = 2 * Math::PI / num_segments
-  else 
+  else
     if (rotations < 0.0 && pitch > 0.0) || (rotations > 0.0 && pitch < 0.0) # Left hand helix
       angle    = -2 * Math::PI / num_segments
     end
@@ -860,29 +860,29 @@ def create_entities(data, container)
       points[points.length] = [x2,y2,z2]
       segment += 1
   end
-  
+
   container.add_curve(points)
 
-end 
+end
 
 def default_parameters
-  # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis 
+  # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis
 
   @@unit_length = PLUGIN.unit_length
   @@segments ||= 16 # per rotation if not previously defined
   @@rotations = 1.0
   @@start_angle = 0.0
-  
+
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
     defaults = { "start_radius" => @@unit_length, "start_angle" => 0.0, "end_radius" => @@unit_length, "pitch" => @@unit_length,"num_segments" => @@segments, "rotations" => @@rotations }
   else
   # Reuse last inputs as defaults
     defaults = { "start_radius" => @@dimension1, "start_angle" => @@start_angle, "end_radius" => @@dimension2, "pitch" => @@dimension3, "num_segments" => @@segments, "rotations" => @@rotations }
-  end # if 
+  end # if
 
   # Return values
-  defaults 
+  defaults
 end
 
 def translate_key(key)

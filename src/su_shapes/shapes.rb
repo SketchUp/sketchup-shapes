@@ -957,6 +957,181 @@ def validate_parameters(data)
 end
 
 end # Class Helix
+
+class HelicalRamp < Sketchup::Samples::Parametric
+# Create ramp in helical form
+
+def create_entities(data, container)
+  # Set sizes to draw
+  start_radius = data["start_radius"].to_l  # Starting radius
+  end_radius = data["end_radius"].to_l  # Ending radius
+  ramp_width = data["ramp_width"].to_l # Width between sides of ramp
+  pitch = data["pitch"].to_l  # Pitch
+  num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
+  rotations = data["rotations"] # No of rotations (not necessarily integer)
+  start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
+  
+  # Remember values for next use
+  @@dimension1 = start_radius
+  @@start_angle = start_angle
+  @@dimension2 = end_radius
+  @@dimension3 = pitch
+  @@dimension4 = ramp_width
+  @@segments = num_segments
+  @@rotations = rotations
+
+  # In case rotations is negative (left hand spiral) take absolute value for total_segments  
+  total_segments = (num_segments * rotations).abs
+  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix 
+    angle    = 2 * Math::PI / num_segments
+  else 
+    if (rotations < 0.0 && pitch > 0.0) || (rotations > 0.0 && pitch < 0.0) # Left hand helix
+      angle    = -2 * Math::PI / num_segments
+    end
+  end
+  cosangle = Math.cos(angle)
+  sinangle = Math.sin(angle)
+
+  segment = 1
+  z_increment = pitch / num_segments
+
+  current_radius = start_radius
+  delta_radius = (end_radius - start_radius) / total_segments
+
+  points = []
+  x1 = current_radius * Math.cos(start_angle.degrees)
+  y1 = current_radius * Math.sin(start_angle.degrees)
+  z1 = 0
+  points[points.length] = [x1,y1,z1]
+  
+  points4 = []
+  x3 = (current_radius + ramp_width) * Math.cos(start_angle.degrees)
+  y3 = (current_radius + ramp_width)* Math.sin(start_angle.degrees)
+  z3 = 0
+  points4[points4.length] = [x3,y3,z3]
+
+# Create a mesh to hold and display the points
+  smooth = 12  # smooth parameter
+  numpts = 2 * total_segments
+  numpoly = numpts + 1
+  mesh = Geom::PolygonMesh.new(numpts, numpoly)
+  # Points at start
+  inner_point = Geom::Point3d.new(x1,y1,z1)
+  outer_point = Geom::Point3d.new(x3,y3,z3)
+  mesh.add_point(inner_point)
+  mesh.add_point(outer_point)
+  
+  
+  # Draw rest of points
+  while segment < (total_segments + 1)
+  # Calculate next point on inner helix
+    x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
+    y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
+    z2 = segment * z_increment
+    points[points.length] = [x2,y2,z2]
+    
+  # Add first face to mesh
+    mesh.add_polygon(Geom::Point3d.new(x1, y1, z1),Geom::Point3d.new(x3,y3,z3),Geom::Point3d.new(x1,y1,z1))
+    #mesh.add_line(Geom::Point3d.new(x3, y3, z3),Geom::Point3d.new(x2,y2,z2))
+    #mesh.add_line(Geom::Point3d.new(x2, y2, z2),Geom::Point3d.new(x1,y1,z1))
+  # Calculate next point on outer helix 
+    x4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
+    y4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
+    z4 = segment * z_increment
+    points4[points4.length] = [x4,y4,z4]
+    
+    #Add next face to mesh
+    mesh.add_polygon(Geom::Point3d.new(x3, y3, z3),Geom::Point3d.new(x4,y4,z4),Geom::Point3d.new(x2,y2,z2))
+    #mesh.add_line(Geom::Point3d.new(x4, y4, z4),Geom::Point3d.new(x2,y2,z2))
+    #mesh.add_line(Geom::Point3d.new(x2, y2, z2),Geom::Point3d.new(x3,y3,z3))
+
+    # Add inner and outer edge points
+#    inner_point = Geom::Point3d.new(x2,y2,z2)
+#    outer_point = Geom::Point3d.new(x4,y4,z4)
+#    mesh.add_point(inner_point)
+#    mesh.add_point(outer_point)
+    
+    segment += 1
+  end
+  container.add_curve(points)
+  container.add_curve(points4)
+  # Create faces from the mesh
+  #container.add_faces_from_mesh mesh, smooth
+ 
+  end 
+
+def default_parameters
+  # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis 
+
+  @@unit_length = PLUGIN.unit_length
+  @@segments ||= 16 # per rotation if not previously defined
+  @@rotations = 1.0
+  @@start_angle = 0.0
+  
+  # Set other starting defaults if none set
+  if !defined? @@dimension1  # then no previous values input
+    defaults = { "start_radius" => @@unit_length, "start_angle" => 0.0, "end_radius" => @@unit_length, 
+    "pitch" => @@unit_length, "ramp_width" => @@unit_length, "num_segments" => @@segments, 
+    "rotations" => @@rotations }
+  else
+  # Reuse last inputs as defaults
+    defaults = { "start_radius" => @@dimension1, "start_angle" => @@start_angle, "end_radius" => @@dimension2, 
+    "pitch" => @@dimension3, "ramp_width" => @@dimension4, "num_segments" => @@segments, 
+    "rotations" => @@rotations }
+  end # if 
+
+  # Return values
+  defaults 
+end
+
+def translate_key(key)
+  prompt = key
+
+  case key
+  when "start_radius"
+    prompt = "Start radius "
+  when "start_angle"
+    prompt = "Start at (angle in degrees) "
+  when "end_radius"
+    prompt = "End radius "
+  when "ramp_width"
+    prompt = "Width of ramp side to side "
+  when "pitch"
+    prompt = "Pitch (if negative, helix goes down) "
+  when "rotations"
+    prompt = "No. of rotations (if negative, makes left hand helix) "
+  when "num_segments"
+    prompt = "Segments per rotation "
+  end
+
+  # Return value
+  prompt
+end
+
+def validate_parameters(data)
+  ok = true
+
+ # if data["rotations"].abs < 360.degrees/@@segments
+ #   UI.messagebox "No. of rotations too small - must allow at least one segment to be drawn"
+ #   ok = false
+ # end
+
+  if data["num_segments"] < 2
+    UI.messagebox "At least 2 segments per rotation required"
+    ok = false
+  end
+  
+  if data["ramp_width"] < 0.0
+    UI.messagebox "Ramp width must be positive"
+    ok = false
+  end
+  
+  # Return value
+  ok
+end
+
+end # Class HelicalRamp
+
 #=============================================================================
 
 # Add a menu for creating 3D shapes
@@ -974,6 +1149,7 @@ unless file_loaded?(__FILE__) # If not, create menu entries
   shapes_menu.add_item("Dome") { Dome.new }
   shapes_menu.add_item("Sphere") { Sphere.new }
   shapes_menu.add_item("Helix") { Helix.new }
+  shapes_menu.add_item("Helical Ramp") { HelicalRamp.new }
   file_loaded(__FILE__)
 end
 

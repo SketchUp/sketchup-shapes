@@ -95,7 +95,7 @@ end
 
 #=============================================================================
 
-class Box < CommunityExtensions::Parametric
+class Box < Parametric
 
 def create_entities(data, container)
   # Set values from input data
@@ -149,7 +149,7 @@ end # Class Box
 
 #=============================================================================
 
-class Cylinder < CommunityExtensions::Parametric
+class Cylinder < Parametric
 
 def create_entities(data, container)
   radius = data["radius"].to_l # Radius
@@ -210,7 +210,7 @@ end # Class Cylinder
 
 #=============================================================================
 
-class Prism < CommunityExtensions::Parametric
+class Prism < Parametric
 
 def create_entities(data, container)
 
@@ -285,7 +285,7 @@ end
 end # class Prism
 #=============================================================================
 
-class Cone < CommunityExtensions::Parametric
+class Cone < Parametric
 
 def create_entities(data, container)
   # Set size to draw
@@ -362,7 +362,7 @@ end
 end # Class Cone
 
 #=============================================================================
-class Torus < CommunityExtensions::Parametric
+class Torus < Parametric
 
 def create_entities(data, container)
 
@@ -456,7 +456,7 @@ end # Class Torus
 
 #=============================================================================
 
-class Tube < CommunityExtensions::Parametric
+class Tube < Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -543,7 +543,7 @@ end #Class Tube
 
 #=============================================================================
 
-class Pyramid < CommunityExtensions::Parametric
+class Pyramid < Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -637,7 +637,7 @@ end # Class Pyramid
 
 #=============================================================================
 
-class Dome < CommunityExtensions::Parametric
+class Dome < Parametric
 
 def create_entities(data, container)
   # Set sizes to draw
@@ -720,7 +720,7 @@ end
 end # Class Dome
 
 #======================================================
-class Sphere < CommunityExtensions::Parametric
+class Sphere < Parametric
 
 def create_entities(data, container)
   # Set sizes to draw

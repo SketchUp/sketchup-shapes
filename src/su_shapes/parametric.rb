@@ -8,7 +8,7 @@
 require 'sketchup.rb'
 
 #=============================================================================
-module CommunityExtensions
+module CommunityExtensions::Shapes
 
 class Parametric
 
@@ -25,7 +25,7 @@ def initialize(*args)
     else
         return if not validate_parameters(data)
         model = Sketchup.active_model
-        model.start_operation self.class.name
+        model.start_operation(short_class_name(), true)
         self.create_entity(model)
         container = self.get_container
         if not container
@@ -53,6 +53,10 @@ end
 # The name to give to the new object
 def compute_name
     self.class.name
+end
+
+def short_class_name
+    self.class.name.split("::").last
 end
 
 # Create a new parametric Entity.  The default implementation creates
@@ -185,7 +189,7 @@ def edit
     # Now clear the old definition and regen the entities
     container = self.get_container
     model = @entity.model
-    model.start_operation "Edit " + self.class.name
+    model.start_operation "Edit #{short_class_name()}"
 
     container.clear!
     self.create_entities(data, container)
@@ -304,10 +308,11 @@ if (not $parametric_loaded)
     UI.add_context_menu_handler do |menu|
         klass = Parametric.selection_parametric?
         if( klass )
+            klass_name = klass.split("::").last
             menu.add_separator
-            menu.add_item("Edit #{klass}") { Parametric.edit_selection }
+            menu.add_item("Edit #{klass_name}") { Parametric.edit_selection }
         end
     end
 end
 
-end # module CommunityExtensions
+end # module CommunityExtensions::Shapes

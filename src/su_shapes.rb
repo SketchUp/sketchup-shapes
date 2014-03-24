@@ -2,42 +2,27 @@
 #
 # License: The MIT License (MIT)
 #
-# A SketchUp Ruby Extension that creates simple shape objects.  More info at  
+# A SketchUp Ruby Extension that creates simple shape objects.  More info at
 # https://github.com/SketchUp/shapes
-#-----------------------------------------------------------------------------
-# Name        :   Shapes 1.4.6
-# Description :   Classes for creating and editing parametric shapes
-# Menu Item   :   Draw->Shapes->Box
-#             :   Draw->Shapes->Cylinder
-#             :   Draw->Shapes->Cone
-#             :   Draw->Shapes->Torus
-#             :   Draw->Shapes->Tube
-#             :   Draw->Shapes->Prism
-#             :   Draw->Shapes->Pyramid
-#             :   Draw->Shapes->Dome
-#             :   Draw->Shapes->Sphere
-#             :   Draw->Shapes->Helix
-# Context Menu:   Edit Box|Cylinder|Cone|Torus|Tube|Prism|Pyramid|Dome|Sphere|Helix
-# Usage       :   Select desired shape and fill in the dialog box that opens.
-# Date        :   2014-03-23
-# Type        :   Dialog Box
-#-----------------------------------------------------------------------------
+
 
 require "sketchup.rb"
 require "extensions.rb"
 
-module Sketchup::Samples
-module Shapes
+module CommunityExtensions
+  module Shapes
 
-# Create the extension.
-shapes_ext = SketchupExtension.new "Shapes Tool", "su_shapes/shapes.rb"
-shapes_ext.description = "Shapes sample script from SketchUp.com"
-shapes_ext.version =  "1.5"
-shapes_ext.creator = "SketchUp"
-shapes_ext.copyright = "2014, Trimble Navigation Limited and John W McClenahan"
+    # Create the extension.
+    loader = File.join(File.dirname(__FILE__), "su_shapes", "shapes.rb")
+    extension = SketchupExtension.new("Shapes Tool", loader)
+    extension.description = "Shapes sample script from SketchUp.com"
+    extension.version     = "1.5.0"
+    extension.creator     = "SketchUp"
+    extension.copyright   = "2014, Trimble Navigation Limited and " <<
+                            "John W McClenahan"
 
-# Register the extension with Sketchup so it show up in the Preference panel.
-Sketchup.register_extension shapes_ext, true
+    # Register the extension with so it show up in the Preference panel.
+    Sketchup.register_extension(extension, true)
 
-end # module Shapes
-end # module Sketchup::Samples
+  end # module Shapes
+end # module CommunityExtensions

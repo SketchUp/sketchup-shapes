@@ -10,8 +10,14 @@ require 'sketchup.rb'
 #=============================================================================
 module CommunityExtensions::Shapes
 
+  # Abstract class which should be inherited by implementing class.
   class Parametric
 
+    # TODO(thomthom): The arguments for this class needs documenting. It looks
+    # like they are overloaded. But how many different mutations are there?
+    # @param [Hash] data
+    # @param [Geom::Transformation] transformation
+    #
     # Initialize a newly created instance of the object
     def initialize(*args)
 
@@ -20,41 +26,40 @@ module CommunityExtensions::Shapes
       data = self.prompt("Create") if not data
       return if not data
 
-      if( data.kind_of? Sketchup::Entity )
+      if data.kind_of?(Sketchup::Entity)
+        # Entity already exist - this instance is for editing it.
         @entity = data
       else
-        return if not validate_parameters(data)
+        # Entity doesn't exist, this instance creates it.
+
+        # TODO(thomthom): Why does it silently fail?
+        return if !validate_parameters(data)
+
         model = Sketchup.active_model
         model.start_operation(short_class_name(), true)
         self.create_entity(model)
+
         container = self.get_container
-        if not container
+        if container.nil?
           model.abort_operation
+          # TODO(thomthom): Why does it silently fail?
           return
         end
 
         self.create_entities(data, container)
-
-        # Set the parameters for the object
         self.set_attributes(data)
 
-        # Apply the transform if one was given
-        t = args[1]
-        if( t.kind_of? Geom::Transformation )
-          @entity.transformation = t
+        transformation = args[1]
+        if transformation.kind_of?(Geom::Transformation)
+          # TODO(thomthom): No error if the type is incorrect?
+          @entity.transformation = transformation
         end
 
         model.commit_operation
-
-        @entity
       end
     end
 
-    # The name to give to the new object
-    def compute_name
-      self.class.name
-    end
-
+    # Generate a human friendly name of the class, omitting the ancestors.
     def short_class_name
       self.class.name.split("::").last
     end
@@ -69,11 +74,12 @@ module CommunityExtensions::Shapes
     # Get the container in which to add new Entities.
     # This method should not need to be over-ridden by derived classes
     def get_container
-      if( @entity.kind_of? Sketchup::Group )
+      case @entity
+      when Sketchup::Group
         container = @entity.entities
-      elsif( @entity.kind_of? Sketchup::ComponentInstance )
+      when Sketchup::ComponentInstance
         container = @entity.definition.entities
-      elsif( @entity.kind_of? Sketchup::ComponentDefinition )
+      when Sketchup::ComponentDefinition
         container = @entity.entities
       else
         container = nil
@@ -83,30 +89,34 @@ module CommunityExtensions::Shapes
 
     # Get the attribute dictionary
     def Parametric.attribute_holder(entity)
-      if( entity.kind_of? Sketchup::Group )
+      case entity
+      when Sketchup::Group
         return entity
-      elsif( entity.kind_of? Sketchup::ComponentInstance )
+      when Sketchup::ComponentInstance
         return entity.definition
-      elsif( entity.kind_of? Sketchup::ComponentDefinition )
+      when Sketchup::ComponentDefinition
         return entity
       end
       nil
     end
 
     def attribute_dictionary(create_if_needed = false)
-      attrib_holder = Parametric.attribute_holder(@entity)
-      attrib_holder ? attrib_holder.attribute_dictionary("skpp", create_if_needed) : nil
+      entity = Parametric.attribute_holder(@entity)
+      # TODO(thomthom): The attribute name is not very descriptive and risk
+      # clashes. Alas, this cannot be changed now as it would break old models.
+      (entity) ? entity.attribute_dictionary("skpp", create_if_needed) : nil
     end
 
     # Get the parameter data from an entity
     def parameters
-      return nil if not @entity
+      return nil if @entity.nil?
 
-      attribs = self.attribute_dictionary
-      return nil if not attribs
+      attributes = self.attribute_dictionary
+      return nil if attributes.nil?
+
       data = {}
-      attribs.each do |key, value|
-        if( key != "class" )
+      attributes.each do |key, value|
+        if key != "class"
           data[key] = value
         end
       end
@@ -125,26 +135,26 @@ module CommunityExtensions::Shapes
       else
         data = self.default_parameters
       end
-      if( not data )
+      if data.nil?
         puts "No parameters attached to the entity"
         return nil
       end
-      title = operation + " " + self.class.name
+      title = "#{operation} #{short_class_name()}"
       keys = []
       prompts = []
       values = []
       data.each do |key, value|
-        if( key != "class" )
-          keys.push key
-          prompts.push self.translate_key(key)
-          values.push value
+        if key != "class"
+          keys << key
+          prompts << self.translate_key(key)
+          values << value
         end
       end
       results = inputbox( prompts, values, title )
       return nil if not results
 
       # Store the results back into data
-      # results will be an Array with one value for each prmopt
+      # results will be an Array with one value for each prompt
       results.each_index { |i| data[keys[i]] = results[i] }
 
       data
@@ -169,45 +179,44 @@ module CommunityExtensions::Shapes
       @entity
     end
 
-    # Edit the parameteric object.  This will prompt for the new values
-    # and then regenerate the geometry
+    # Edit the parametric object.  This will prompt for the new values
+    # and then regenerate the geometry.
     def edit
-      if( not @entity )
+      if @entity.nil?
         puts "There is no Entity to Edit"
         return false
       end
 
-      data = self.prompt "Edit"
+      data = self.prompt("Edit")
       return false if not data
 
-      # Make sure that valid values were entered
-      ok = self.validate_parameters(data)
-      if( not ok )
+      # Make sure that valid values were entered.
+      if !self.validate_parameters(data)
         return false
       end
 
-      # Now clear the old definition and regen the entities
+      # Now clear the old definition and regenerate the entities.
       container = self.get_container
       model = @entity.model
-      model.start_operation "Edit #{short_class_name()}"
+      model.start_operation("Edit #{short_class_name()}")
 
       container.clear!
       self.create_entities(data, container)
-
       self.set_attributes(data)
+
       model.commit_operation
 
       @entity
     end
 
     #-----------------------------------------------------------------------------
-    # Class methods for editing parameteric objects
+    # Class methods for editing parametric objects
 
     # Determine the class of a parametric entity
     def Parametric.get_class(ent)
       attrib_holder = Parametric.attribute_holder(ent)
       return nil if not attrib_holder
-      attrib_holder.get_attribute "skpp", "class"
+      attrib_holder.get_attribute("skpp", "class")
     end
 
     # Determine if an Entity is a parametric object
@@ -216,8 +225,10 @@ module CommunityExtensions::Shapes
       return false if not klass
 
       # Make sure that we can actually create an instance of this class.
+      # TODO(thomthom): This should be cleaned up. Shouldn't be need to use
+      # eval. And it should probably raise an error.
       begin
-        new_method = eval "#{klass}.method :new"
+        new_method = eval("#{klass}.method :new")
       rescue
         # If we couldn't find the new method, it probably means that
         # the code for this kind of parametric object wasn't loaded
@@ -230,14 +241,17 @@ module CommunityExtensions::Shapes
     end
 
     def Parametric.selection_parametric?
-      ss = Sketchup.active_model.selection
-      false if ss.count != 1
-      Parametric.parametric? ss.first
+      selection = Sketchup.active_model.selection
+      false if selection.count != 1
+      Parametric.parametric?(selection.first)
     end
 
     def Parametric.edit(ent)
-      if( not Parametric.parametric?(ent) )
+      if !Parametric.parametric?(ent)
         UI.beep
+        # TODO(thomthom): Error in the console? Either this should display a
+        # warning to the user, or the inheriting class should do so. All these
+        # `puts` calls should be avoided - they are only useful to a developer.
         puts "#{ent} is not a parametric Entity"
         return false
       end
@@ -245,7 +259,9 @@ module CommunityExtensions::Shapes
       # Get the class of the parametric object
       klass = Parametric.get_class(ent)
 
-      # Create a new parametric object of that class
+      # Create a new parametric object of that class.
+      # TODO: Avoid eval - convert string to constants and use that to create
+      # the instance.
       new_method = eval "#{klass}.method :new"
       obj = new_method.call ent
       if not obj
@@ -259,13 +275,13 @@ module CommunityExtensions::Shapes
 
     # Edit the current selection
     def Parametric.edit_selection
-      if not Parametric.selection_parametric?
+      if !Parametric.selection_parametric?
         UI.beep
         puts "The selected Entity is not parametric"
         return false
       end
 
-      Parametric.edit Sketchup.active_model.selection.first
+      Parametric.edit(Sketchup.active_model.selection.first)
     end
 
     #-----------------------------------------------------------------------------
@@ -276,12 +292,12 @@ module CommunityExtensions::Shapes
     # the parameters needed to create the object are passed in as a Hash.
     # This must be implemented by any class that includes Parametric
     def create_entities(data, container)
-      puts "create_entities must be implemented by #{self.class.name}"
+      raise NotImplementedError, "Must be implemented by derived class"
     end
 
     # Get the default parameters for the object.
     def default_parameters
-      puts "default_parameters must be implemented by #{self.class.name}"
+      raise NotImplementedError, "Must be implemented by derived class"
     end
 
     # Check that valid parameters were entered
@@ -306,11 +322,11 @@ module CommunityExtensions::Shapes
     $parametric_loaded = true
 
     UI.add_context_menu_handler do |menu|
-      klass = Parametric.selection_parametric?
-      if( klass )
-        klass_name = klass.split("::").last
+      klass_name = Parametric.selection_parametric?
+      if klass_name
+        short_klass_name = klass_name.split("::").last
         menu.add_separator
-        menu.add_item("Edit #{klass_name}") { Parametric.edit_selection }
+        menu.add_item("Edit #{short_klass_name}") { Parametric.edit_selection }
       end
     end
   end

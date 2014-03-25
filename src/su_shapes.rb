@@ -16,7 +16,7 @@ module CommunityExtensions
     loader = File.join(File.dirname(__FILE__), "su_shapes", "shapes.rb")
     extension = SketchupExtension.new("Shapes Tool", loader)
     extension.description = "Shapes sample script from SketchUp.com"
-    extension.version     = "1.5.0"
+    extension.version     = "2.0.0"
     extension.creator     = "SketchUp"
     extension.copyright   = "2014, Trimble Navigation Limited and " <<
                             "John W McClenahan"

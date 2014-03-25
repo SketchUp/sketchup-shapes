@@ -20,6 +20,7 @@ of shapes chosen from:
 - Pyramid
 - Dome
 - Sphere
+- Helix
 
 Edit the parameters to the desired size and (where relevant) number of segments or sides to
 use, and click [OK]. The shape is then drawn located at the axis origin [0,0,0] as a Group.

@@ -4,6 +4,7 @@
 
 
 require "sketchup.rb"
+File.join(File.dirname(__FILE__), 'parametric.rb').inspect
 require File.join(File.dirname(__FILE__), 'parametric.rb')
 require File.join(File.dirname(__FILE__), 'mesh_additions.rb')
 
@@ -925,7 +926,7 @@ end
 
 end # Class Helix
 
-class HelicalRamp < Sketchup::Samples::Parametric
+class HelicalRamp < Parametric
 # Create ramp in helical form
 
 def create_entities(data, container)
@@ -965,17 +966,17 @@ def create_entities(data, container)
   current_radius = start_radius
   delta_radius = (end_radius - start_radius) / total_segments
 
-  points = []
+  points1 = []
   x1 = current_radius * Math.cos(start_angle.degrees)
   y1 = current_radius * Math.sin(start_angle.degrees)
-  z1 = 0
-  points[points.length] = [x1,y1,z1]
+  z1 = 0.0
+  points1[points1.length] = [x1,y1,z1]
   
-  points4 = []
-  x3 = (current_radius + ramp_width) * Math.cos(start_angle.degrees)
-  y3 = (current_radius + ramp_width)* Math.sin(start_angle.degrees)
-  z3 = 0
-  points4[points4.length] = [x3,y3,z3]
+  points2 = []
+  x2 = (current_radius + ramp_width) * Math.cos(start_angle.degrees)
+  y2 = (current_radius + ramp_width)* Math.sin(start_angle.degrees)
+  z2 = 0.0
+  points2[points2.length] = [x2,y2,z2]
 
 # Create a mesh to hold and display the points
   smooth = 12  # smooth parameter
@@ -983,49 +984,43 @@ def create_entities(data, container)
   numpoly = numpts + 1
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
   # Points at start
-  inner_point = Geom::Point3d.new(x1,y1,z1)
-  outer_point = Geom::Point3d.new(x3,y3,z3)
-  mesh.add_point(inner_point)
-  mesh.add_point(outer_point)
+  inner_start_point = Geom::Point3d.new(x1,y1,z1)
+  outer_start_point = Geom::Point3d.new(x2,y2,z2)
+  mesh.add_point(inner_start_point)
+  mesh.add_point(outer_start_point)
   
   
   # Draw rest of points
-  while segment < (total_segments + 1)
+  while segment < total_segments + 1
   # Calculate next point on inner helix
-    x2 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
-    y2 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
-    z2 = segment * z_increment
-    points[points.length] = [x2,y2,z2]
-    
-  # Add first face to mesh
-    mesh.add_polygon(Geom::Point3d.new(x1, y1, z1),Geom::Point3d.new(x3,y3,z3),Geom::Point3d.new(x1,y1,z1))
-    #mesh.add_line(Geom::Point3d.new(x3, y3, z3),Geom::Point3d.new(x2,y2,z2))
-    #mesh.add_line(Geom::Point3d.new(x2, y2, z2),Geom::Point3d.new(x1,y1,z1))
+    x3 = (current_radius + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
+    y3 = (current_radius + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
+    z3 = segment * z_increment
+    points1[segment] = [x3,y3,z3]
+
   # Calculate next point on outer helix 
     x4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
     y4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
     z4 = segment * z_increment
-    points4[points4.length] = [x4,y4,z4]
-    
-    #Add next face to mesh
-    mesh.add_polygon(Geom::Point3d.new(x3, y3, z3),Geom::Point3d.new(x4,y4,z4),Geom::Point3d.new(x2,y2,z2))
-    #mesh.add_line(Geom::Point3d.new(x4, y4, z4),Geom::Point3d.new(x2,y2,z2))
-    #mesh.add_line(Geom::Point3d.new(x2, y2, z2),Geom::Point3d.new(x3,y3,z3))
+    points2[segment] = [x4,y4,z4]
 
-    # Add inner and outer edge points
-#    inner_point = Geom::Point3d.new(x2,y2,z2)
-#    outer_point = Geom::Point3d.new(x4,y4,z4)
-#    mesh.add_point(inner_point)
-#    mesh.add_point(outer_point)
+    # Add first face in segment to mesh
+    mesh.add_polygon(Geom::Point3d.new(points1[segment - 1]),Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points1[segment]))
     
+    #Add next face in segment to mesh
+    mesh.add_polygon(Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points2[segment]),Geom::Point3d.new(points1[segment]))
+    
+    # Increment segment counter
     segment += 1
   end
-  container.add_curve(points)
-  container.add_curve(points4)
+
   # Create faces from the mesh
-  #container.add_faces_from_mesh mesh, smooth
- 
-  end 
+  container.add_faces_from_mesh mesh, smooth
+
+  if rotations < 0.0 # need to reverse faces
+    # still to work out how to get a set of faces to .reverse!
+  end
+end 
 
 def default_parameters
   # Set starting defaults to one unit_length and one rotation along axis, start angle at 0.0 degrees from x-axis 
@@ -1083,8 +1078,8 @@ def validate_parameters(data)
  #   ok = false
  # end
 
-  if data["num_segments"] < 2
-    UI.messagebox "At least 2 segments per rotation required"
+  if data["num_segments"] < 4
+    UI.messagebox "At least 4 segments per rotation required"
     ok = false
   end
   

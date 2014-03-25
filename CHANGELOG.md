@@ -45,3 +45,9 @@ Replaced the few remaining cryptic abbreviations with more descriptive names
 ##v1.5 2014-03-23
 Added new Shape - Helix, based on adaptation of Jim Foltz's DrawHelix14.rb, which in turn
 was based on Peter Brown's DrawHelix13.rb (2004). The adaptation allows negative Pitch (to draw helix downwards) and/or negative No. of rotations, to draw left hand helix instead of right hand, and adds another editable parameter for the angle at which to start drawing the helix.
+
+##v2.0 2014-03-24
+Merged further code clean-up changes from Thomas Thomasson, into version which he will publish on Extension Warehouse
+
+##v2.01 2014-03-24
+Added another new shape, Helical Ramp. Still to do: add another parameter so starting and ending ramp width can be different. Also, perhaps, reverse faces if rotations < 0 for left hand helix

@@ -49,5 +49,5 @@ was based on Peter Brown's DrawHelix13.rb (2004). The adaptation allows negative
 ##v2.0 2014-03-24
 Merged further code clean-up changes from Thomas Thomasson, into version which he will publish on Extension Warehouse
 
-##v2.01 2014-03-24
-Added another new shape, Helical Ramp. Still to do: add another parameter so starting and ending ramp width can be different. Also, perhaps, reverse faces if rotations < 0 for left hand helix
+##v2.01 2014-03-25
+Added another new shape, Helical Ramp. Still to do: perhaps, reverse faces if rotations < 0 for left hand helix.

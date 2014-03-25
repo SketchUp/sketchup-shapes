@@ -1,7 +1,7 @@
 # Copyright 2014 Trimble Navigation Ltd.
 #
 # License: The MIT License (MIT)
-
+# v2.1 added HelicalRamp class
 
 require "sketchup.rb"
 File.join(File.dirname(__FILE__), 'parametric.rb').inspect
@@ -819,12 +819,16 @@ def create_entities(data, container)
   num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
   rotations = data["rotations"] # No of rotations (not necessarily integer)
   start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
+  ramp_start_width = data["ramp_start_width"] # Width of ramp at start
+  ramp_end_width = data["ramp_end_width"] # Width of ramp at start
 
   # Remember values for next use
   @@dimension1 = start_radius
   @@start_angle = start_angle
   @@dimension2 = end_radius
   @@dimension3 = pitch
+  @@dimension4 = ramp_start_width
+  @@dimension5 = ramp_end_width
   @@segments = num_segments
   @@rotations = rotations
 
@@ -933,9 +937,10 @@ def create_entities(data, container)
   # Set sizes to draw
   start_radius = data["start_radius"].to_l  # Starting radius
   end_radius = data["end_radius"].to_l  # Ending radius
-  ramp_width = data["ramp_width"].to_l # Width between sides of ramp
+  ramp_start_width = data["ramp_start_width"].to_l # Width between sides of ramp at start
+  ramp_end_width = data["ramp_end_width"].to_l # Width between sides of ramp at end
   pitch = data["pitch"].to_l  # Pitch
-  num_segments = data["num_segments"].to_int   # Number of segments per 360 degree rotation
+  num_segments = data["num_segments"].abs.to_int   # Number of segments per 360 degree rotation
   rotations = data["rotations"] # No of rotations (not necessarily integer)
   start_angle = data["start_angle"] # Angle to start at (relative to x-axis)
   
@@ -944,16 +949,17 @@ def create_entities(data, container)
   @@start_angle = start_angle
   @@dimension2 = end_radius
   @@dimension3 = pitch
-  @@dimension4 = ramp_width
+  @@dimension4 = ramp_start_width
+  @@dimension5 = ramp_end_width
   @@segments = num_segments
   @@rotations = rotations
 
   # In case rotations is negative (left hand spiral) take absolute value for total_segments  
   total_segments = (num_segments * rotations).abs
-  if (rotations > 0.0 && pitch > 0.0) || (rotations < 0.0 && pitch < 0.0) # Right hand helix 
+  if (rotations > 0.0 && pitch >= 0.0) || (rotations < 0.0 && pitch <= 0.0) # Right hand helix 
     angle    = 2 * Math::PI / num_segments
   else 
-    if (rotations < 0.0 && pitch > 0.0) || (rotations > 0.0 && pitch < 0.0) # Left hand helix
+    if (rotations < 0.0 && pitch >= 0.0) || (rotations > 0.0 && pitch <= 0.0) # Left hand helix
       angle    = -2 * Math::PI / num_segments
     end
   end
@@ -965,6 +971,8 @@ def create_entities(data, container)
 
   current_radius = start_radius
   delta_radius = (end_radius - start_radius) / total_segments
+  
+  delta_width = (ramp_end_width - ramp_start_width) / total_segments
 
   points1 = []
   x1 = current_radius * Math.cos(start_angle.degrees)
@@ -973,8 +981,8 @@ def create_entities(data, container)
   points1[points1.length] = [x1,y1,z1]
   
   points2 = []
-  x2 = (current_radius + ramp_width) * Math.cos(start_angle.degrees)
-  y2 = (current_radius + ramp_width)* Math.sin(start_angle.degrees)
+  x2 = (current_radius + ramp_start_width) * Math.cos(start_angle.degrees)
+  y2 = (current_radius + ramp_start_width)* Math.sin(start_angle.degrees)
   z2 = 0.0
   points2[points2.length] = [x2,y2,z2]
 
@@ -999,8 +1007,8 @@ def create_entities(data, container)
     points1[segment] = [x3,y3,z3]
 
   # Calculate next point on outer helix 
-    x4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.cos(segment * angle + start_angle.degrees)
-    y4 = (current_radius + ramp_width + (delta_radius * segment)) * Math.sin(segment * angle + start_angle.degrees)
+    x4 = (current_radius + ramp_start_width + (delta_radius * segment) + (delta_width * segment)) * Math.cos(segment * angle + start_angle.degrees)
+    y4 = (current_radius + ramp_start_width + (delta_radius * segment) + (delta_width * segment)) * Math.sin(segment * angle + start_angle.degrees)
     z4 = segment * z_increment
     points2[segment] = [x4,y4,z4]
 
@@ -1033,13 +1041,13 @@ def default_parameters
   # Set other starting defaults if none set
   if !defined? @@dimension1  # then no previous values input
     defaults = { "start_radius" => @@unit_length, "start_angle" => 0.0, "end_radius" => @@unit_length, 
-    "pitch" => @@unit_length, "ramp_width" => @@unit_length, "num_segments" => @@segments, 
-    "rotations" => @@rotations }
+    "pitch" => @@unit_length, "ramp_start_width" => @@unit_length, "ramp_end_width" => @@unit_length, 
+    "num_segments" => @@segments, "rotations" => @@rotations }
   else
   # Reuse last inputs as defaults
     defaults = { "start_radius" => @@dimension1, "start_angle" => @@start_angle, "end_radius" => @@dimension2, 
-    "pitch" => @@dimension3, "ramp_width" => @@dimension4, "num_segments" => @@segments, 
-    "rotations" => @@rotations }
+    "pitch" => @@dimension3, "ramp_start_width" => @@dimension4, "ramp_end_width" => @@dimension5, 
+    "num_segments" => @@segments, "rotations" => @@rotations }
   end # if 
 
   # Return values
@@ -1056,8 +1064,10 @@ def translate_key(key)
     prompt = "Start at (angle in degrees) "
   when "end_radius"
     prompt = "End radius "
-  when "ramp_width"
-    prompt = "Width of ramp side to side "
+  when "ramp_start_width"
+    prompt = "Width of ramp side to side at start "
+  when "ramp_end_width"
+    prompt = "Width of ramp side to side at end "
   when "pitch"
     prompt = "Pitch (if negative, helix goes down) "
   when "rotations"
@@ -1073,18 +1083,22 @@ end
 def validate_parameters(data)
   ok = true
 
- # if data["rotations"].abs < 360.degrees/@@segments
- #   UI.messagebox "No. of rotations too small - must allow at least one segment to be drawn"
- #   ok = false
- # end
+  if data["rotations"].abs < 1.0/@@segments
+    UI.messagebox "No. of rotations too small - must allow at least one segment to be drawn"
+    ok = false
+  end
 
-  if data["num_segments"] < 4
-    UI.messagebox "At least 4 segments per rotation required"
+  if data["num_segments"].abs < 3
+    UI.messagebox "At least 3 segments per rotation required"
     ok = false
   end
   
-  if data["ramp_width"] < 0.0
-    UI.messagebox "Ramp width must be positive"
+  if data["ramp_start_width"] < 0.0
+    UI.messagebox "Ramp start width must be positive"
+    ok = false
+  end
+  if data["ramp_end_width"] < 0.0
+    UI.messagebox "Ramp end width must be positive"
     ok = false
   end
   

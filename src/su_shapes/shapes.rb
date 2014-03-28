@@ -961,6 +961,7 @@ def create_entities(data, container)
   else 
     if (rotations < 0.0 && pitch >= 0.0) || (rotations > 0.0 && pitch <= 0.0) # Left hand helix
       angle    = -2 * Math::PI / num_segments
+      left_hand = TRUE
     end
   end
   cosangle = Math.cos(angle)
@@ -1012,12 +1013,22 @@ def create_entities(data, container)
     z4 = segment * z_increment
     points2[segment] = [x4,y4,z4]
 
-    # Add first face in segment to mesh
-    mesh.add_polygon(Geom::Point3d.new(points1[segment - 1]),Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points1[segment]))
-    
-    #Add next face in segment to mesh
-    mesh.add_polygon(Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points2[segment]),Geom::Point3d.new(points1[segment]))
-    
+   # Add next segment (two faces) to mesh 
+    if !left_hand  # right hand rotation
+      # Add first face in segment to mesh: add points counterclockwise
+      mesh.add_polygon(Geom::Point3d.new(points1[segment - 1]),Geom::Point3d.new(points2[segment - 1]),
+      Geom::Point3d.new(points1[segment]))
+      #Add next face in segment to mesh
+      mesh.add_polygon(Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points2[segment]),
+      Geom::Point3d.new(points1[segment]))
+    else 
+    # Add first face in segment to mesh - left-hand rotation; add points clockwise
+      mesh.add_polygon(Geom::Point3d.new(points2[segment - 1]),Geom::Point3d.new(points1[segment - 1]),
+      Geom::Point3d.new(points1[segment]))
+      #Add next face in segment to mesh
+      mesh.add_polygon(Geom::Point3d.new(points2[segment]),Geom::Point3d.new(points2[segment - 1]),
+      Geom::Point3d.new(points1[segment]))
+    end    
     # Increment segment counter
     segment += 1
   end

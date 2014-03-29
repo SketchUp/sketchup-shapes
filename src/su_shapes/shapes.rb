@@ -391,7 +391,7 @@ def create_entities(data, container)
   numpoly = numpts
   mesh = Geom::PolygonMesh.new(numpts, numpoly)
   mesh.extend(PolygonMeshHelper)
-  mesh.add_revolved_points(pts, [ORIGIN, Z_AXIS], n2)
+  mesh.add_revolved_points(points, [ORIGIN, Z_AXIS], n2)
 
   # create faces from the mesh
   container.add_faces_from_mesh(mesh, 12)

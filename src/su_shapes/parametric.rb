@@ -55,6 +55,10 @@ module CommunityExtensions::Shapes
           @entity.transformation = transformation
         end
 
+        if @entity.kind_of?(Sketchup::ComponentDefinition)
+          model.place_component(@entity, false)
+        end
+
         model.commit_operation
       end
     end
@@ -65,10 +69,10 @@ module CommunityExtensions::Shapes
     end
 
     # Create a new parametric Entity.  The default implementation creates
-    # a Group.  Derived classes can over-ride this method to create a
-    # ComponentDefinition or ComponentInstance instead.
+    # a ComponentDefinition.  Derived classes can over-ride this method to create a
+    # Group or ComponentInstance instead.
     def create_entity(model)
-      @entity = model.active_entities.add_group
+      @entity = model.definitions.add(short_class_name())
     end
 
     # Get the container in which to add new Entities.

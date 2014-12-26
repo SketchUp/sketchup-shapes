@@ -25,9 +25,11 @@ Changed small radius default to one quarter outer radius, giving a torus with on
 
 ##v1.4.1 J W McClenahan 2013-12-31
 Adapting to SU2014 Beta - Ruby changed to v2.0 and shapes.rb crashes - won't load
+
 All lines like: 
   defaults = {"r", 2.feet, "h", 4.feet, "n", 6}  #Original values 
 failed with syntax error 
+
 Changed all such lines to the now necessary syntax form, with remembered default values:
   defaults = {"w" => @@dim1, "d" => @@dim2, "h" => @@dim3} 
 
@@ -37,11 +39,28 @@ Ruby style cleanup to fix code not in accordance with GitHub Ruby Style Guide
   including replacing highly abbreviated variable names with more descriptive names
 
 ##v1.4.6 2014-02-16
-Fixed a few if statements with overlooked parentheses round condition
+Fixed a few if statements with overlooked parentheses round condition. 
+
 Replaced the few remaining cryptic abbreviations with more descriptive names
   e1, e2 to edge1, edge2
   pts to points
 
 ##v1.5 2014-03-23
-Added new Shape - Helix, based on adaptation of Jim Foltz's DrawHelix14.rb, which in turn
-was based on Peter Brown's DrawHelix13.rb (2004). The adaptation allows negative Pitch (to draw helix downwards) and/or negative No. of rotations, to draw left hand helix instead of right hand, and adds another editable parameter for the angle at which to start drawing the helix.
+Added new Shape - Helix, based on adaptation of Jim Foltz's DrawHelix14.rb (ca. 2008), which in turn
+was based on Peter Brown's DrawHelix13.rb (2004). The adaptation allows negative Pitch (to draw helix downwards) and/or negative No. of rotations, to draw left hand helix instead of right hand, and adds another editable parameter for the angle from the X-axis at which to start drawing the helix.
+
+##v2.0 2014-03-24
+Merged further code clean-up changes, mainly in parametric.rb and mesh_additions.rb, from Thomas Thomasson, into version which he will publish on Extension Warehouse
+
+##v2.1 2014-03-25
+Added another new shape, Helical Ramp. Still to do: reverse faces if rotations < 0 for left hand helix.
+
+##v2.1.1 2014-03-28
+Fixed reversed faces for left handed helix by drawing them clockwise instead of anti-clockwise. 
+
+Tidied up code for drawing faces.
+
+##v2.2 2014-04-18
+Added new Shape - Helical Ramp with Sides. Added sides, with option for angle of slope of sides. 
+
+Fixed minor bug - number of rotations was being reset to default value of 1.0 on editing or redrawing helix-based shapes, not remembering previous value.

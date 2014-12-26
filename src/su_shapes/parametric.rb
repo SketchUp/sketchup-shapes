@@ -49,18 +49,20 @@ module CommunityExtensions::Shapes
         self.create_entities(data, container)
         self.set_attributes(data)
 
-        transformation = args[1]
+        transformation = args[1] || IDENTITY
         if transformation.kind_of?(Geom::Transformation)
           # TODO(thomthom): No error if the type is incorrect?
-          @entity.transformation = transformation
+          # args[1] is typically nil. It is the exception that
+          # a transformation is provided on initialization.
+          @entity.transformation = transformation if @entity.respond_to?(:transformation=)
         else
-          raise(ArgumentError, "#{__FILE__}:#{__LINE__} 2nd argument is not a Geom::Transformation")
+          raise(ArgumentError, "Invalid type #{transformation.class}. Expected Geom::Transformation")
         end
 
         model.commit_operation
 
         if @entity.kind_of?(Sketchup::ComponentDefinition)
-          model.place_component(@entity, false)
+          model.place_component(@entity, false) # no repeat
         end
 
       end

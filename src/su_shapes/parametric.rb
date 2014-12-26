@@ -53,6 +53,8 @@ module CommunityExtensions::Shapes
         if transformation.kind_of?(Geom::Transformation)
           # TODO(thomthom): No error if the type is incorrect?
           @entity.transformation = transformation
+        else
+          raise(ArgumentError, "#{__FILE__}:#{__LINE__} 2nd argument is not a Geom::Transformation")
         end
 
         model.commit_operation

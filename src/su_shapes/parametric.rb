@@ -55,11 +55,12 @@ module CommunityExtensions::Shapes
           @entity.transformation = transformation
         end
 
+        model.commit_operation
+
         if @entity.kind_of?(Sketchup::ComponentDefinition)
           model.place_component(@entity, false)
         end
 
-        model.commit_operation
       end
     end
 

@@ -115,6 +115,8 @@ module CommunityExtensions::Shapes
     shapes_menu.add_item("Dome") { Dome.new }
     shapes_menu.add_item("Sphere") { Sphere.new }
     shapes_menu.add_item("Helix") { Helix.new }
+    shapes_menu.add_item("Helical Ramp") { HelicalRamp.new }
+    shapes_menu.add_item("Helical Ramp with Sides") { HelicalRampWithSides.new }
     file_loaded(__FILE__)
   end
 

@@ -16,10 +16,10 @@ module CommunityExtensions
     loader = File.join(File.dirname(__FILE__), "su_shapes", "shapes.rb")
     extension = SketchupExtension.new("Shapes Tool", loader)
     extension.description = "Shapes sample script from SketchUp.com"
-    extension.version     = "2.0.1"
+    extension.version     = "2.1.0"
     extension.creator     = "SketchUp"
-    extension.copyright   = "2014, Trimble Navigation Limited and " <<
-                            "John W McClenahan"
+    extension.copyright   = "2014, Trimble Navigation Limited, " <<
+                            "John W McClenahan, Jim Foltz"
 
     # Register the extension with so it show up in the Preference panel.
     Sketchup.register_extension(extension, true)

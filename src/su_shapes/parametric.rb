@@ -49,13 +49,22 @@ module CommunityExtensions::Shapes
         self.create_entities(data, container)
         self.set_attributes(data)
 
-        transformation = args[1]
+        transformation = args[1] || IDENTITY
         if transformation.kind_of?(Geom::Transformation)
           # TODO(thomthom): No error if the type is incorrect?
-          @entity.transformation = transformation
+          # args[1] is typically nil. It is the exception that
+          # a transformation is provided on initialization.
+          @entity.transformation = transformation if @entity.respond_to?(:transformation=)
+        else
+          raise(ArgumentError, "Invalid type #{transformation.class}. Expected Geom::Transformation")
         end
 
         model.commit_operation
+
+        if @entity.kind_of?(Sketchup::ComponentDefinition)
+          model.place_component(@entity, false) # no repeat
+        end
+
       end
     end
 
@@ -65,10 +74,10 @@ module CommunityExtensions::Shapes
     end
 
     # Create a new parametric Entity.  The default implementation creates
-    # a Group.  Derived classes can over-ride this method to create a
-    # ComponentDefinition or ComponentInstance instead.
+    # a ComponentDefinition.  Derived classes can over-ride this method to create a
+    # Group or ComponentInstance instead.
     def create_entity(model)
-      @entity = model.active_entities.add_group
+      @entity = model.definitions.add(short_class_name())
     end
 
     # Get the container in which to add new Entities.

@@ -8,9 +8,9 @@ SketchUp Shapes allows users to quickly creates 3D shape objects by specifying a
 
 The latest and greatest is available as an RBZ file from Extension Warehouse. 
 
-Generally, the best way to install an extension is to open Extension Warehouse from inside SketchUp, searching for  "shapes" and then click the Install button (You need to be signed in to download).  Installing via SketchUp will automatically download, unpack and place the files in the appropriate locations.  
+Generally, the best way to install an extension is to open Extension Warehouse from inside SketchUp, searching for "shapes" and then click the Install button (You need to be signed in to download).  Installing via SketchUp will automatically download, unpack and place the files in the appropriate locations.  
 
-If you need to download from outside SketchUp, follow this url - http://extensions.sketchup.com/content/shapes.
+If you need to download from outside SketchUp, follow this url: [http://extensions.sketchup.com/content/shapes](http://extensions.sketchup.com/content/shapes/).
 
 Then open SketchUp and select `Window → Preferences` (Microsoft Windows) or `SketchUp → Preferences` (Mac OS X) `→ Extensions → Install Extension` and select the RBZ file you just downloaded. Voila! SketchUp installs the extension. 
 
@@ -42,7 +42,7 @@ If you're a SketchUp Ruby community member, you need to fork this repository (If
 
 1. Fork this repository ([tutorial](https://help.github.com/articles/fork-a-repo)). Forking will create a copy of this repository under your GitHub username.
 
-1. Clone a local copy of your fork to your compuater. For this you will need git installed on your personal computer. [SourceTree](http://www.sourcetreeapp.com/) is a good choice. It will let you perform most git tasks via a GUI.
+1. Clone a local copy of your fork to your computer. For this you will need git installed on your personal computer. [SourceTree](http://www.sourcetreeapp.com/) is a good choice. It will let you perform most git tasks via a GUI.
 
 1. Add this repository as a remote so you can pull in updates to your clone.
 

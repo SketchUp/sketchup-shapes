@@ -61,4 +61,4 @@ See the LICENSE and NOTICE files for more information
 
 Copyright 2014 Trimble Navigation Ltd.
 
-License: The MIT License (MIT)
+License: [The MIT License (MIT)](https://opensource.org/licenses/MIT)
